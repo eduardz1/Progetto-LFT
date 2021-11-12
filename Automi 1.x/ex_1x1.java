@@ -1,6 +1,6 @@
 public class ex_1x1{
 
-    public static boolean scan(String s) {
+    public static boolean scan1(String s) {
     int state = 0;
     int i = 0;
 

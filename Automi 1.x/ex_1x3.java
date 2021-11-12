@@ -1,18 +1,18 @@
 public class ex_1x3 {
     public static void main(String[] args) {
-        System.out.println(scan("123456Bianchi") == true);
-        System.out.println(scan("654321Rossi")   == true);
-        System.out.println(scan("2Bianchi")      == true);
-        System.out.println(scan("122B")          == true);
-        System.out.println(scan("654321Bianchi") == false);
-        System.out.println(scan("123456Rossi")   == false);
-        System.out.println(scan("654321")        == false);
-        System.out.println(scan("Rossi")         == false);
-        System.out.println(scan("12346Bianchi5") == false);
-        System.out.println(scan("65431Rossi2")   == false);
+        System.out.println(scan3("123456Bianchi") == true);
+        System.out.println(scan3("654321Rossi")   == true);
+        System.out.println(scan3("2Bianchi")      == true);
+        System.out.println(scan3("122B")          == true);
+        System.out.println(scan3("654321Bianchi") == false);
+        System.out.println(scan3("123456Rossi")   == false);
+        System.out.println(scan3("654321")        == false);
+        System.out.println(scan3("Rossi")         == false);
+        System.out.println(scan3("12346Bianchi5") == false);
+        System.out.println(scan3("65431Rossi2")   == false);
     }
 
-    public static boolean scan(String s){
+    public static boolean scan3(String s){
         int state = 0;
         int i = 0;
 

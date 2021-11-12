@@ -1,18 +1,18 @@
 public class ex_1x5 {
     public static void main(String[] args) {
-        System.out.println(scan("Bianchi123456") == true);
-        System.out.println(scan("Rossi654321")   == true);
-        System.out.println(scan("Bianchi2")      == true);
-        System.out.println(scan("B122")          == true);
-        System.out.println(scan("Bianchi654321") == false);
-        System.out.println(scan("Rossi123456")   == false);
-        System.out.println(scan("654321")        == false);
-        System.out.println(scan("Rossi")         == false);
-        System.out.println(scan("Bianchi12346B") == false);
-        System.out.println(scan("Ros2si65431")   == false);
+        System.out.println(scan5("Bianchi123456") == true);
+        System.out.println(scan5("Rossi654321")   == true);
+        System.out.println(scan5("Bianchi2")      == true);
+        System.out.println(scan5("B122")          == true);
+        System.out.println(scan5("Bianchi654321") == false);
+        System.out.println(scan5("Rossi123456")   == false);
+        System.out.println(scan5("654321")        == false);
+        System.out.println(scan5("Rossi")         == false);
+        System.out.println(scan5("Bianchi12346B") == false);
+        System.out.println(scan5("Ros2si65431")   == false);
     }
 
-    public static boolean scan(String s){
+    public static boolean scan5(String s){
         int state = 0;
         int i = 0;
 

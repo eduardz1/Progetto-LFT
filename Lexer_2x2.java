@@ -1,6 +1,6 @@
 import java.io.*;
 import java.util.*;
-// this is a random comment
+
 public class Lexer_2x2 {
 
     public static int line = 1;
@@ -289,13 +289,6 @@ public class Lexer_2x2 {
                         state = 1;
                         break;
 
-                    /*
-                     * case 1: if (peek == ' ') { return Word.identifier; } else if
-                     * (Character.isLetterOrDigit(peek)) state = 1; else {
-                     * System.err.println("Syntax error" + " on Token : " + peek); return null; }
-                     * break;
-                     */
-
                     // 2.2 soluzione per identificatori del tipo
                     // (a+...+Z+(_(_)*(a+...+Z+0+...+9)))(a+...+Z+0+...+9+_)*
                     case 1:
@@ -345,7 +338,7 @@ public class Lexer_2x2 {
     }
 
     public static void main(String[] args) {
-        Lexer lex = new Lexer();
+        Lexer_2x2 lex = new Lexer_2x2();
         String path = "C:\\Users\\occhi\\University\\LFT_lab\\prova.txt"; // il percorso del file da leggere
         try {
             BufferedReader br = new BufferedReader(new FileReader(path));

@@ -146,7 +146,7 @@ public class Lexer_2x1 {
             return new Token(Tag.EOF);
 
         default:
-            if (Character.isLetter(peek) || peek == '_') { // gestisco identificatori e parole chiave
+            if (Character.isLetter(peek)) { // gestisco identificatori e parole chiave
                 int state = 0;
 
                 do {
@@ -289,32 +289,12 @@ public class Lexer_2x1 {
                         state = 1;
                         break;
 
-                    /*
-                     * case 1: if (peek == ' ') { return Word.identifier; } else if
-                     * (Character.isLetterOrDigit(peek)) state = 1; else {
-                     * System.err.println("Syntax error" + " on Token : " + peek); return null; }
-                     * break;
-                     */
-
-                    // 2.2 soluzione per identificatori del tipo
-                    // (a+...+Z+(_(_)*(a+...+Z+0+...+9)))(a+...+Z+0+...+9+_)*
                     case 1:
-                        if (Character.isLetterOrDigit(peek) || peek == '_')
-                            state = 2;
-                        else {
-                            System.err.println("Syntax error" + " on Token : " + peek);
-                            return null;
-                        }
-                        break;
-
-                    case 2:
                         if (peek == ' ') {
                             return Word.identifier;
-                        } else if (Character.isLetterOrDigit(peek)) {
-                            state = 2;
-                        } else if (peek == '_') {
+                        } else if (Character.isLetterOrDigit(peek))
                             state = 1;
-                        } else {
+                        else {
                             System.err.println("Syntax error" + " on Token : " + peek);
                             return null;
                         }
@@ -345,7 +325,7 @@ public class Lexer_2x1 {
     }
 
     public static void main(String[] args) {
-        Lexer lex = new Lexer();
+        Lexer_2x1 lex = new Lexer_2x1();
         String path = "C:\\Users\\occhi\\University\\LFT_lab\\prova.txt"; // il percorso del file da leggere
         try {
             BufferedReader br = new BufferedReader(new FileReader(path));

@@ -1,20 +1,20 @@
 public class ex_1x4 {
     public static void main(String[] args) {
-        System.out.println(scan(" 123456 Bianchi") == true);
-        System.out.println(scan("654321 Rossi")    == true);
-        System.out.println(scan("2Bi anchi")       == true);
-        System.out.println(scan("  122  B ")       == true);
-        System.out.println(scan("654321Bianchi")   == false);
-        System.out.println(scan("123456Rossi")     == false);
-        System.out.println(scan("654321")          == false);
-        System.out.println(scan("Rossi")           == false);
-        System.out.println(scan("12346Bianchi5")   == false);
-        System.out.println(scan("65431Rossi2")     == false);
-        System.out.println(scan("123 456 Bianchi") == false);
-        System.out.println(scan(" 12345 6Bianchi") == false);
+        System.out.println(scan4(" 123456 Bianchi") == true);
+        System.out.println(scan4("654321 Rossi")    == true);
+        System.out.println(scan4("2Bi anchi")       == true);
+        System.out.println(scan4("  122  B ")       == true);
+        System.out.println(scan4("654321Bianchi")   == false);
+        System.out.println(scan4("123456Rossi")     == false);
+        System.out.println(scan4("654321")          == false);
+        System.out.println(scan4("Rossi")           == false);
+        System.out.println(scan4("12346Bianchi5")   == false);
+        System.out.println(scan4("65431Rossi2")     == false);
+        System.out.println(scan4("123 456 Bianchi") == false);
+        System.out.println(scan4(" 12345 6Bianchi") == false);
     }
 
-    public static boolean scan(String s){
+    public static boolean scan4(String s){
         int state = 0;
         int i = 0;
 
