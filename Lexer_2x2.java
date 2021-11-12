@@ -3,6 +3,7 @@ import java.util.*;
 
 public class Lexer_2x2 {
 
+    private final String identifier_RE = "[a-zA-Z[_[_]*[a-zA-Z0-9]]][a-zA-Z0-9_]*"; // espressione regolare per gli identificatori
     public static int line = 1;
     private char peek = ' ';
 
@@ -147,188 +148,66 @@ public class Lexer_2x2 {
 
         default:
             if (Character.isLetter(peek) || peek == '_') { // gestisco identificatori e parole chiave
-                int state = 0;
+                
+                String identifier = "";
+                while(Character.isLetterOrDigit(peek) || peek == '_'){
+                    identifier+=peek;
+                    readch(br);
+                }
 
-                do {
-                    switch (state) {
-                    case 0:
-                        switch (peek) { // controllo se e' un parola chiave, se non lo e' passo allo state 1 che e' un
-                                        // automa che riconsoce gli identificatori
+                switch (identifier){
 
-                        case 'a': // assign
-                            readch(br);
-                            if (peek == 's') {
-                                readch(br);
-                                if (peek == 's') {
-                                    readch(br);
-                                    if (peek == 'i') {
-                                        readch(br);
-                                        if (peek == 'g') {
-                                            readch(br);
-                                            if (peek == 'n') {
-                                                peek = ' ';
-                                                return Word.assign;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            state = 2;
-                            break;
+                    case "assign":
+                        return Word.assign;
 
-                        case 't': // to
-                            readch(br);
-                            if (peek == 'o') {
-                                peek = ' ';
-                                return Word.to;
-                            }
-                            state = 2;
-                            break;
+                    case "to":
+                        return Word.to;
 
-                        case 'i': // if
-                            readch(br);
-                            if (peek == 'f') {
-                                return Word.iftok;
-                            }
-                            state = 2;
-                            break;
+                    case "if":
+                        return Word.iftok;
 
-                        case 'e':
-                            readch(br);
-                            if (peek == 'l') { // else
-                                readch(br);
-                                if (peek == 's') {
-                                    readch(br);
-                                    if (peek == 'e') {
-                                        peek = ' ';
-                                        return Word.elsetok;
-                                    }
-                                }
-                            } else if (peek == 'n') { // end
-                                readch(br);
-                                if (peek == 'd') {
-                                    peek = ' ';
-                                    return Word.end;
-                                }
-                            }
-                            state = 2;
-                            break;
+                    case "else":
+                        return Word.elsetok;
 
-                        case 'w': // while
-                            readch(br);
-                            if (peek == 'h') {
-                                readch(br);
-                                if (peek == 'i') {
-                                    readch(br);
-                                    if (peek == 'l') {
-                                        readch(br);
-                                        if (peek == 'e') {
-                                            peek = ' ';
-                                            return Word.whiletok;
-                                        }
-                                    }
-                                }
-                            }
-                            state = 2;
-                            break;
+                    case "while":
+                        return Word.whiletok;
 
-                        case 'b': // begin
-                            readch(br);
-                            if (peek == 'e') {
-                                readch(br);
-                                if (peek == 'g') {
-                                    readch(br);
-                                    if (peek == 'i') {
-                                        readch(br);
-                                        if (peek == 'n') {
-                                            peek = ' ';
-                                            return Word.begin;
-                                        }
-                                    }
-                                }
-                            }
-                            state = 2;
-                            break;
+                    case "begin":
+                        return Word.begin;
 
-                        case 'p': // print
-                            readch(br);
-                            if (peek == 'r') {
-                                readch(br);
-                                if (peek == 'i') {
-                                    readch(br);
-                                    if (peek == 'n') {
-                                        readch(br);
-                                        if (peek == 't') {
-                                            peek = ' ';
-                                            return Word.print;
-                                        }
-                                    }
-                                }
-                            }
-                            state = 2;
-                            break;
+                    case "end":
+                        return Word.end;
 
-                        case 'r':
-                            readch(br);
-                            if (peek == 'e') {
-                                readch(br);
-                                if (peek == 'a') {
-                                    readch(br);
-                                    if (peek == 'd') {
-                                        peek = ' ';
-                                        return Word.read;
-                                    }
-                                }
-                            }
-                            state = 2;
-                            break;
+                    case "print":
+                        return Word.print;
 
-                        }
+                    case "read":
+                        return Word.read;
+
+                    case "or":
+                        return Word.or;
+
+                    case "and":
+                        return Word.and;
 
                     default:
-                        state = 1;
-                        break;
-
-                    // 2.2 soluzione per identificatori del tipo
-                    // (a+...+Z+(_(_)*(a+...+Z+0+...+9)))(a+...+Z+0+...+9+_)*
-                    case 1:
-                        if (Character.isLetterOrDigit(peek) || peek == '_')
-                            state = 2;
-                        else {
-                            System.err.println("Syntax error" + " on Token : " + peek);
-                            return null;
+                        if(identifier.matches(identifier_RE)){
+                            return new Word(Tag.ID, identifier);
                         }
-                        break;
+                        System.err.println("Syntax error in: " + identifier);
+                        return null;
+                        
+                }
 
-                    case 2:
-                        if (peek == ' ') {
-                            return Word.identifier;
-                        } else if (Character.isLetterOrDigit(peek)) {
-                            state = 2;
-                        } else if (peek == '_') {
-                            state = 1;
-                        } else {
-                            System.err.println("Syntax error" + " on Token : " + peek);
-                            return null;
-                        }
-                        break;
-
-                    }
-                } while (peek != ' ');
-
-                System.err.println("Syntax error" + " on Token : " + peek); // default behaviour
-                return null;
 
             } else if (Character.isDigit(peek)) {
 
-                while (peek != ' ') {
+                String number = "";
+                while(Character.isDigit(peek)){
+                    number+=peek;
                     readch(br);
-                    if (!Character.isDigit(peek)) {
-                        System.err.println("Syntax error" + " on Token : " + peek);
-                        return null;
-                    }
                 }
-                return Word.number;
+                return new Word(Tag.NUM, number);
 
             } else {
                 System.err.println("Erroneous character: " + peek);

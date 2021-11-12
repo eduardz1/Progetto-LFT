@@ -292,8 +292,9 @@ public class Lexer_2x1 {
                 System.err.println("Syntax error" + " on Token : " + peek); // default behaviour
                 return null;
 
-            } else if (Character.isDigit(peek)) {
-                while (peek != ' ') {
+            } else if (Character.isDigit(peek)) { // ok non potrà mai funzionare di sto passo
+                readch(br);
+                while (lexical_scan(br)!=null) {
                     readch(br);
                     if (!Character.isDigit(peek)) {
                         System.err.println("Syntax error" + " on Token : " + peek);
