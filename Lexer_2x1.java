@@ -55,23 +55,6 @@ public class Lexer_2x1 {
             return Token.mult;
 
         case '/':
-            readch(br);
-            if (peek == '/') {
-                peek = '\n';
-                return null;
-            } else if (peek == '*') {
-                readch(br);
-                while (peek != (char) -1) {
-                    if (peek == '*') {
-                        readch(br);
-                        if (peek == '/') {
-                            return null;
-                        }
-                    }
-                }
-                System.err.println("ERROR");
-                return null;
-            }
             peek = ' ';
             return Token.div;
 
@@ -290,12 +273,13 @@ public class Lexer_2x1 {
                         break;
 
                     case 1:
-                        if (peek == ' ') {
-                            return Word.identifier;
-                        } else if (Character.isLetterOrDigit(peek))
+                        readch(br);
+                        if (Character.isLetterOrDigit(peek))
                             state = 1;
                         else {
-                            System.err.println("Syntax error" + " on Token : " + peek);
+                            if (lexical_scan(br) != null)
+                                return Word.identifier;
+                            System.err.println("Syntax error on Identifier : " + peek);
                             return null;
                         }
                         break;
@@ -326,7 +310,7 @@ public class Lexer_2x1 {
 
     public static void main(String[] args) {
         Lexer_2x1 lex = new Lexer_2x1();
-        String path = "C:\\Users\\occhi\\University\\LFT_lab\\prova.txt"; // il percorso del file da leggere
+        String path = "C:\\Users\\occhi\\Github\\university\\LFT_lab\\prova.txt"; // il percorso del file da leggere
         try {
             BufferedReader br = new BufferedReader(new FileReader(path));
             Token tok;
