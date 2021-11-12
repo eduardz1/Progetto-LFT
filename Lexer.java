@@ -1,7 +1,7 @@
 import java.io.*;
 import java.util.*;
 // this is a random comment
-public class Lexer_2x3 {
+public class Lexer {
 
     public static int line = 1;
     private char peek = ' ';
@@ -345,7 +345,7 @@ public class Lexer_2x3 {
     }
 
     public static void main(String[] args) {
-        Lexer_2x3 lex = new Lexer_2x3();
+        Lexer lex = new Lexer();
         String path = "C:\\Users\\occhi\\University\\LFT_lab\\prova.txt"; // il percorso del file da leggere
         try {
             BufferedReader br = new BufferedReader(new FileReader(path));
