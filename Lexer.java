@@ -54,18 +54,22 @@ public class Lexer {
             peek = ' ';
             return Token.mult;
 
-        case '/':
+        case '/': // implementazione commenti
             readch(br);
             if (peek == '/') {
-                peek = '\n';
-                return null;
+                while(peek != '\n')
+                    readch(br);
+                peek = ' ';
+                return lexical_scan(br);
             } else if (peek == '*') {
                 readch(br);
                 while (peek != (char) -1) {
-                    if (peek == '*') {
+                    readch(br);
+                    while (peek == '*') {
                         readch(br);
                         if (peek == '/') {
-                            return null;
+                            peek = ' ';
+                            return lexical_scan(br);
                         }
                     }
                 }
@@ -346,7 +350,7 @@ public class Lexer {
 
     public static void main(String[] args) {
         Lexer lex = new Lexer();
-        String path = "C:\\Users\\occhi\\University\\LFT_lab\\prova.txt"; // il percorso del file da leggere
+        String path = "C:\\Users\\occhi\\Github\\university\\LFT_lab\\prova.txt"; // il percorso del file da leggere
         try {
             BufferedReader br = new BufferedReader(new FileReader(path));
             Token tok;

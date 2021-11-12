@@ -277,8 +277,10 @@ public class Lexer_2x1 {
                         if (Character.isLetterOrDigit(peek))
                             state = 1;
                         else {
-                            if (lexical_scan(br) != null)
-                                return Word.identifier;
+                            if (lexical_scan(br) != null) {
+                                System.out.println("Scan: " + Word.identifier);
+                                return lexical_scan(br);
+                            }
                             System.err.println("Syntax error on Identifier : " + peek);
                             return null;
                         }
@@ -291,7 +293,6 @@ public class Lexer_2x1 {
                 return null;
 
             } else if (Character.isDigit(peek)) {
-
                 while (peek != ' ') {
                     readch(br);
                     if (!Character.isDigit(peek)) {
