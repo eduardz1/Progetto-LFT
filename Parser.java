@@ -28,61 +28,152 @@ public class Parser {
             error("syntax error");
     }
 
+    
+    /// FIRST(start) = FIRST(expr) = FIRST(term) = FIRST(fact) = {NUM} U {(} <== GUIDA(start)
     public void start() {
-        // ... completare ...
-        expr();
-        match(Tag.EOF);
-        // ... completare ...
+        switch(look.tag){
+
+            case '(':
+                match(Tag.LPT);
+                expr();
+                match(Tag.EOF);
+
+            case Tag.NUM:
+                match(Tag.NUM);
+                expr();
+                match(Tag.EOF);
+
+            default:
+                error("error in start");
+        }
     }
 
+    /// FIRST(expr) = FIRST(term) = FIRST(fact) = {NUM} U {(} <== GUIDA(expr)
     private void expr() {
-        term();
-        exprp();
-    }
+        switch(look.tag){
 
+            case '(':
+                // match(Tag.LPT);
+                term();
+                exprp();
+                break;
+
+            case Tag.NUM:
+                // match(Tag.NUM);
+                term();
+                exprp();
+                break;
+
+            default:
+                error("error in expr");
+
+        }    
+    }
+ 
     private void exprp() {
         switch (look.tag) {
 
+            /// GUIDA(exprp --> +<term><exprp>) ==> {+}
             case '+':
+                match(Tag.SUM); 
                 term();
                 exprp();
+                break;
 
+            /// GUIDA(exprp --> -<term><exprp>) ==> {-}
             case '-':
+                match(Tag.SUB);
                 term();
                 exprp();
+                break;
 
-            case ' ':
-                // nothing
+            /// GUIDA(exprp --> epsilon) ==> {)} U EOF
+            case ')':
+                match(Tag.RPT);
+                break;
+            
+            case -1:
+                match(Tag.EOF);
+                break;
+
+            /// ERROR
+            default:
+                error("error in exprp");
 
         }
     }
 
+    /// FIRST(term) = FIRST(fact) = {NUM} U {(} <== GUIDA(term)
     private void term() {
-        fact();
-        termp();
+        switch(look.tag){
+
+            case '(':
+                // match(Tag.LPT);
+                fact();
+                termp();
+                break;
+
+            case Tag.NUM:
+                // match(Tag.NUM);
+                fact();
+                termp();
+                break;
+
+            default:
+                error("error in term");
+
+        }     
+        
+        
     }
 
     private void termp() {
         switch(look.tag){
 
+            /// GUIDA(termp --> *<fact><exprp>) ==> {*}
             case '*':
+                match(Tag.MUL);
                 fact();
                 termp();
+                break;
 
+            /// GUIDA(termp --> /<fact><exprp>) ==> {/}
             case '/':
+                match(Tag.DIV);
                 fact();
                 termp();
+                break;
 
-            case ' ':
-                //nothing
+            /// GUIDA(termp --> epsilon) ==> {)} U EOF
+            case ')':
+                match(Tag.EOF);
+                break;
+            
+            case -1:
+                match(Tag.EOF);
+                break;
+
+            /// ERROR
+            default:
+                error("error in termp");
 
         }
     }
 
     private void fact() {
-        expr();
-        // or
-        match(Tag.NUM);
+        switch(look.tag){
+
+            case '(':
+                match(Tag.LPT);
+                expr();
+
+            case Tag.NUM:
+                match(Tag.NUM);
+                break;
+                
+            default:
+                error("error in fact");
+        }
     }
 
     public static void main(String[] args) {

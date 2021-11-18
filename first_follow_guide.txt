@@ -1,0 +1,46 @@
+$ E FOLLOW(start)
+FIRST(EOF) E FOLLOW(expr)
+
+FOLLOW(expr) c= FOLLOW(term)
+FOLLOW(expr) c= FOLLOW(exprp)
+
+FOLLOW(exprp) c= FOLLOW(term)
+
+FOLLOW(term) c= FOLLOW(fact)
+FOLLOW(term) c= FOLLOW(termp)
+
+FOLLOW(termp) c= FOLLOW(fact)
+
+FIRST()) E FOLLOW(expr)
+
+
+$ E FOLLOW(start)
+FOLLOW(expr) c= FOLLOW(exprp) c= FOLLOW(term) c= FOLLOW(termp) c= FOLLOW(fact) 
+{)} U {EOF} E FOLLOW(expr) c= FOLLOW(term)
+
+
+
+
+
+
+
+
+Guida(Start-> <expr>EOF)=FIRST(START)={(,NUM}
+
+Guida(Expr-> <term><exprp>)=FIRST(TERM)={(,NUM}
+
+GUIDA(EXPRP-> +<term><exprp>)=FIRST(+)={+}
+GUIDA(EXPRP-> -<term><exprp>)=FIRST(-)={-}
+GUIDA(EXPRP-> epsilon)=FIRST(epsilon) U FOLLOW(EXPRP)={),EOF}
+
+GUIDA(TERM-><fact><termp)=FIRST(FACT)={(,NUM}
+
+
+GUIDA(TERMP-> *<fact><exprp>)=FIRST(*)={*}
+GUIDA(TERMP-> /<fact><exprp>)=FIRST(/)={/}
+GUIDA(TERMP-> epsilon)=FIRST(epsilon) U FOLLOW(EXPRP)={),EOF}
+
+GUIDA(FACT-> (<expr>) = FIRST( "(" ) = {(}
+GUIDA(FACT-> NUM) = FIRST(NUM) = {NUM} 
+
+
