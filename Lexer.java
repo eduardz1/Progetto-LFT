@@ -1,9 +1,8 @@
 import java.io.*;
 import java.util.*;
-// this is a random comment
+
 public class Lexer {
 
-    private final String identifier_RE = "[a-zA-Z[_[_]*[a-zA-Z0-9]]][a-zA-Z0-9_]*"; // espressione regolare per gli identificatori
     public static int line = 1;
     private char peek = ' ';
 
@@ -55,22 +54,18 @@ public class Lexer {
             peek = ' ';
             return Token.mult;
 
-        case '/': // implementazione commenti
+        case '/':
             readch(br);
             if (peek == '/') {
-                while(peek != '\n')
-                    readch(br);
-                peek = ' ';
-                return lexical_scan(br);
+                peek = '\n';
+                return null;
             } else if (peek == '*') {
                 readch(br);
                 while (peek != (char) -1) {
-                    readch(br);
-                    while (peek == '*') {
+                    if (peek == '*') {
                         readch(br);
                         if (peek == '/') {
-                            peek = ' ';
-                            return lexical_scan(br);
+                            return null;
                         }
                     }
                 }
@@ -87,7 +82,7 @@ public class Lexer {
         case ',':
             peek = ' ';
             return Token.comma;
-
+        
         case '&':
             readch(br);
             if (peek == '&') {
@@ -152,65 +147,195 @@ public class Lexer {
 
         default:
             if (Character.isLetter(peek) || peek == '_') { // gestisco identificatori e parole chiave
-                String identifier = "";
-                while(Character.isLetterOrDigit(peek) || peek == '_'){
-                    identifier+=peek;
-                    readch(br);
-                }
+                int state = 0;
 
-                switch (identifier){
+                do {
+                    switch (state) {
+                    case 0:
+                        switch (peek) { // controllo se e' un parola chiave, se non lo e' passo allo state 1 che e' un
+                                        // automa che riconsoce gli identificatori
 
-                    case "assign":
-                        return Word.assign;
+                        case 'a': // assign
+                            readch(br);
+                            if (peek == 's') {
+                                readch(br);
+                                if (peek == 's') {
+                                    readch(br);
+                                    if (peek == 'i') {
+                                        readch(br);
+                                        if (peek == 'g') {
+                                            readch(br);
+                                            if (peek == 'n') {
+                                                peek = ' ';
+                                                return Word.assign;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            state = 2;
+                            break;
 
-                    case "to":
-                        return Word.to;
+                        case 't': // to
+                            readch(br);
+                            if (peek == 'o') {
+                                peek = ' ';
+                                return Word.to;
+                            }
+                            state = 2;
+                            break;
 
-                    case "if":
-                        return Word.iftok;
+                        case 'i': // if
+                            readch(br);
+                            if (peek == 'f') {
+                                return Word.iftok;
+                            }
+                            state = 2;
+                            break;
 
-                    case "else":
-                        return Word.elsetok;
+                        case 'e':
+                            readch(br);
+                            if (peek == 'l') { // else
+                                readch(br);
+                                if (peek == 's') {
+                                    readch(br);
+                                    if (peek == 'e') {
+                                        peek = ' ';
+                                        return Word.elsetok;
+                                    }
+                                }
+                            } else if (peek == 'n') { // end
+                                readch(br);
+                                if (peek == 'd') {
+                                    peek = ' ';
+                                    return Word.end;
+                                }
+                            }
+                            state = 2;
+                            break;
 
-                    case "while":
-                        return Word.whiletok;
+                        case 'w': // while
+                            readch(br);
+                            if (peek == 'h') {
+                                readch(br);
+                                if (peek == 'i') {
+                                    readch(br);
+                                    if (peek == 'l') {
+                                        readch(br);
+                                        if (peek == 'e') {
+                                            peek = ' ';
+                                            return Word.whiletok;
+                                        }
+                                    }
+                                }
+                            }
+                            state = 2;
+                            break;
 
-                    case "begin":
-                        return Word.begin;
+                        case 'b': // begin
+                            readch(br);
+                            if (peek == 'e') {
+                                readch(br);
+                                if (peek == 'g') {
+                                    readch(br);
+                                    if (peek == 'i') {
+                                        readch(br);
+                                        if (peek == 'n') {
+                                            peek = ' ';
+                                            return Word.begin;
+                                        }
+                                    }
+                                }
+                            }
+                            state = 2;
+                            break;
 
-                    case "end":
-                        return Word.end;
+                        case 'p': // print
+                            readch(br);
+                            if (peek == 'r') {
+                                readch(br);
+                                if (peek == 'i') {
+                                    readch(br);
+                                    if (peek == 'n') {
+                                        readch(br);
+                                        if (peek == 't') {
+                                            peek = ' ';
+                                            return Word.print;
+                                        }
+                                    }
+                                }
+                            }
+                            state = 2;
+                            break;
 
-                    case "print":
-                        return Word.print;
+                        case 'r':
+                            readch(br);
+                            if (peek == 'e') {
+                                readch(br);
+                                if (peek == 'a') {
+                                    readch(br);
+                                    if (peek == 'd') {
+                                        peek = ' ';
+                                        return Word.read;
+                                    }
+                                }
+                            }
+                            state = 2;
+                            break;
 
-                    case "read":
-                        return Word.read;
-
-                    case "or":
-                        return Word.or;
-
-                    case "and":
-                        return Word.and;
+                        }
 
                     default:
-                        if(identifier.matches(identifier_RE)){
-                            return new Word(Tag.ID, identifier);
-                        }
-                        System.err.println("Syntax error in: " + identifier);
-                        return null;
-                        
-                }
+                        state = 1;
+                        break;
 
+                    /*
+                     * case 1: if (peek == ' ') { return Word.identifier; } else if
+                     * (Character.isLetterOrDigit(peek)) state = 1; else {
+                     * System.err.println("Syntax error" + " on Token : " + peek); return null; }
+                     * break;
+                     */
+
+                    // 2.2 soluzione per identificatori del tipo
+                    // (a+...+Z+(_(_)*(a+...+Z+0+...+9)))(a+...+Z+0+...+9+_)*
+                    case 1:
+                        if (Character.isLetterOrDigit(peek) || peek == '_')
+                            state = 2;
+                        else {
+                            System.err.println("Syntax error" + " on Token : " + peek);
+                            return null;
+                        }
+                        break;
+
+                    case 2:
+                        if (peek == ' ') {
+                            return Word.identifier;
+                        } else if (Character.isLetterOrDigit(peek)) {
+                            state = 2;
+                        } else if (peek == '_') {
+                            state = 1;
+                        } else {
+                            System.err.println("Syntax error" + " on Token : " + peek);
+                            return null;
+                        }
+                        break;
+
+                    }
+                } while (peek != ' ');
+
+                System.err.println("Syntax error" + " on Token : " + peek); // default behaviour
+                return null;
 
             } else if (Character.isDigit(peek)) {
 
-                String number = "";
-                while(Character.isDigit(peek)){
-                    number+=peek;
+                while (peek != ' ') {
                     readch(br);
+                    if (!Character.isDigit(peek)) {
+                        System.err.println("Syntax error" + " on Token : " + peek);
+                        return null;
+                    }
                 }
-                return new Word(Tag.NUM, number);
+                return Word.number;
 
             } else {
                 System.err.println("Erroneous character: " + peek);
@@ -221,7 +346,7 @@ public class Lexer {
 
     public static void main(String[] args) {
         Lexer lex = new Lexer();
-        String path = "C:\\Users\\occhi\\Github\\university\\LFT_lab\\prova.txt"; // il percorso del file da leggere
+        String path = "C:\\Users\\occhi\\University\\LFT_lab\\prova.txt"; // il percorso del file da leggere
         try {
             BufferedReader br = new BufferedReader(new FileReader(path));
             Token tok;
