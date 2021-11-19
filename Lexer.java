@@ -4,7 +4,7 @@ import java.util.*;
 public class Lexer {
 
     private final String identifier_RE = "[a-zA-Z[_[_]*[a-zA-Z0-9]]][a-zA-Z0-9_]*"; // espressione regolare per gli identificatori
-    public static int line = 1;
+    public int line = 1;
     private char peek = ' ';
 
     private void readch(BufferedReader br) {

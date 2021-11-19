@@ -34,13 +34,13 @@ public class Parser {
         switch(look.tag){
 
             case '(':
-                match(Tag.LPT);
+                // match(Tag.LPT);
                 expr();
                 match(Tag.EOF);
                 break;
 
             case Tag.NUM:
-                match(Tag.NUM);
+                // match(Tag.NUM);
                 expr();
                 match(Tag.EOF);
                 break;
