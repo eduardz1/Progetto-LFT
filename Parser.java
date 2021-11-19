@@ -91,7 +91,7 @@ public class Parser {
 
             /// GUIDA(exprp --> epsilon) ==> {)} U EOF
             case ')':
-                // match(Tag.RPT);
+                match(Tag.RPT);
                 break;
             
             case -1:
@@ -100,7 +100,8 @@ public class Parser {
 
             /// ERROR
             default:
-                error("error in exprp");
+                // error("error in exprp");
+                break;
 
         }
     }
@@ -148,7 +149,7 @@ public class Parser {
 
             /// GUIDA(termp --> epsilon) ==> {)} U EOF
             case ')':
-                // match(Tag.EOF);
+                match(Tag.RPT);
                 break;
             
             case -1:
@@ -157,7 +158,8 @@ public class Parser {
 
             /// ERROR
             default:
-                error("error in termp");
+                // error("error in termp");
+                break;
 
         }
     }
