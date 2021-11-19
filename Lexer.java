@@ -1,5 +1,5 @@
 import java.io.*;
-import java.util.*;
+// import java.util.*; <-- never utilized
 // this is a random comment
 public class Lexer {
 
