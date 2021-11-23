@@ -99,7 +99,7 @@ public class Parser {
                 break;
 
             /// ERROR
-            default:
+            default: // if epsilon there's nothign to match and we just break;
                 // error("error in exprp");
                 break;
 

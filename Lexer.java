@@ -116,8 +116,8 @@ public class Lexer {
             } else if (peek == '=') {
                 peek = ' ';
                 return Word.le;
-            } else if (peek == ' ') {
-                peek = ' ';
+            } else if (peek == ' ' || Character.isLetterOrDigit(peek)) {
+                // NO --> peek = ' '; otherwise we eat an extra char
                 return Word.lt;
             } else {
                 System.err.println("Erroneous character" + " after < : " + peek);
@@ -129,8 +129,8 @@ public class Lexer {
             if (peek == '=') {
                 peek = ' ';
                 return Word.ge;
-            } else if (peek == ' ') {
-                peek = ' ';
+            } else if (peek == ' ' || Character.isLetterOrDigit(peek)) {
+                // NO --> peek = ' '; otherwise we eat an extra char
                 return Word.gt;
             } else {
                 System.err.println("Erroneous character" + " after > : " + peek);
