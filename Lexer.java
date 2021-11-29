@@ -74,7 +74,7 @@ public class Lexer {
                         }
                     }
                 }
-                System.err.println("ERROR");
+                System.err.println("Erroneous comment");
                 return null;
             }
             peek = ' ';
