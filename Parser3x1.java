@@ -147,7 +147,20 @@ public class Parser3x1 {
                 termp();
                 break;
 
-            /// GUIDA(termp --> epsilon) ==> {)} U EOF
+            case '+':
+                match(Tag.SUM);
+                fact();
+                termp();
+                break;
+
+            case '-':
+                match(Tag.SUB);
+                fact();
+                termp();
+                break; 
+
+
+            /// GUIDA(termp --> epsilon) ==> {)} U EOF U {+} U {-} 
             case ')':
                 match(Tag.RPT);
                 break;
@@ -158,7 +171,7 @@ public class Parser3x1 {
 
             /// ERROR
             default:
-                // error("error in termp");
+                error("error in termp");
                 break;
 
         }
