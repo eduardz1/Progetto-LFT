@@ -1,5 +1,5 @@
 import java.io.*;
-import java.util.*;
+// import java.util.*; <== not necessary
 
 public class Lexer_2x2 {
 

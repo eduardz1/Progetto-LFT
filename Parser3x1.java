@@ -28,79 +28,73 @@ public class Parser3x1 {
             error("syntax error");
     }
 
-    
-    /// FIRST(start) = FIRST(expr) = FIRST(term) = FIRST(fact) = {NUM} U {(} <== GUIDA(start)
+    /// FIRST(start) = FIRST(expr) = FIRST(term) = FIRST(fact) = {NUM} U {(} <==
+    /// GUIDA(start)
     public void start() {
-        switch(look.tag){
+        switch (look.tag) {
 
             case '(':
-                // match(Tag.LPT);
                 expr();
                 match(Tag.EOF);
                 break;
 
             case Tag.NUM:
-                // match(Tag.NUM);
                 expr();
                 match(Tag.EOF);
                 break;
 
             default:
-                error("error in start");
+                error("Error in start");
         }
     }
 
     /// FIRST(expr) = FIRST(term) = FIRST(fact) = {NUM} U {(} <== GUIDA(expr)
     private void expr() {
-        switch(look.tag){
+        switch (look.tag) {
 
             case '(':
-                // match(Tag.LPT);
                 term();
                 exprp();
                 break;
 
             case Tag.NUM:
-                // match(Tag.NUM);
                 term();
                 exprp();
                 break;
 
             default:
-                error("error in expr");
+                error("Error in expr");
 
-        }    
+        }
     }
- 
+
     private void exprp() {
         switch (look.tag) {
 
-            /// GUIDA(exprp --> +<term><exprp>) ==> {+}
+            // GUIDA[<exprp> --> +<term><exprp>] = {+}
             case '+':
-                match(Tag.SUM); 
+                match(Tag.SUM);
                 term();
                 exprp();
                 break;
 
-            /// GUIDA(exprp --> -<term><exprp>) ==> {-}
+            // GUIDA[<exprp> --> -<term><exprp>] = {-}
             case '-':
                 match(Tag.SUB);
                 term();
                 exprp();
                 break;
 
-            /// GUIDA(exprp --> epsilon) ==> {)} U EOF
+            // GUIDA[<exprp> --> ε] = {)} U EOF
             case ')':
-                match(Tag.RPT);
-                break;
-            
-            case -1:
-                // match(Tag.EOF);
+                // no match in epsilon prdouctions
                 break;
 
-            /// ERROR
-            default: // if epsilon there's nothign to match and we just break;
-                // error("error in exprp");
+            case -1:
+                break;
+
+            default:
+                error("Error in exprp");
                 break;
 
         }
@@ -108,95 +102,85 @@ public class Parser3x1 {
 
     /// FIRST(term) = FIRST(fact) = {NUM} U {(} <== GUIDA(term)
     private void term() {
-        switch(look.tag){
+        switch (look.tag) {
 
             case '(':
-                // match(Tag.LPT);
                 fact();
                 termp();
                 break;
 
             case Tag.NUM:
-                // match(Tag.NUM);
                 fact();
                 termp();
                 break;
 
             default:
-                error("error in term");
+                error("Error in term");
 
-        }     
-        
-        
+        }
+
     }
 
     private void termp() {
-        switch(look.tag){
+        switch (look.tag) {
 
-            /// GUIDA(termp --> *<fact><exprp>) ==> {*}
+            // GUIDA(termp --> *<fact><exprp>) ==> {*}
             case '*':
                 match(Tag.MUL);
                 fact();
                 termp();
                 break;
 
-            /// GUIDA(termp --> /<fact><exprp>) ==> {/}
+            // GUIDA(termp --> /<fact><exprp>) ==> {/}
             case '/':
                 match(Tag.DIV);
                 fact();
                 termp();
                 break;
 
+            // GUIDA[termp := epsilon] = {)} U {EOF} U {+} U {-}
             case '+':
-                match(Tag.SUM);
-                fact();
-                termp();
                 break;
 
             case '-':
-                match(Tag.SUB);
-                fact();
-                termp();
-                break; 
+                break;
 
-
-            /// GUIDA(termp --> epsilon) ==> {)} U EOF U {+} U {-} 
             case ')':
-                match(Tag.RPT);
-                break;
-            
-            case -1:
-                // match(Tag.EOF);
                 break;
 
-            /// ERROR
-            default:
-                error("error in termp");
+            case -1:
                 break;
+
+            // ERROR
+            default:
+                error("Error in termp");
 
         }
     }
 
     private void fact() {
-        switch(look.tag){
-
+        switch (look.tag) {
+            // GUIDA[<fact> := (<expr>)] = {(}
             case '(':
                 match(Tag.LPT);
                 expr();
+                match(Tag.RPT);
                 break;
 
+            // GUIDA[<fact> := NUM] = {NUM}
             case Tag.NUM:
                 match(Tag.NUM);
                 break;
-                
+
             default:
-                error("error in fact");
+                error("Error in fact");
         }
     }
 
     public static void main(String[] args) {
         Lexer lex = new Lexer();
-        String path = "C:\\Users\\occhi\\Github\\university\\LFT_lab\\File_Prova\\prova.lft"; // il percorso del file da leggere
+        String path = "C:\\Users\\occhi\\Github\\university\\LFT_lab\\File_Prova\\prova.lft"; // il percorso del file da
+                                                                                              // leggere
         try {
             BufferedReader br = new BufferedReader(new FileReader(path));
             Parser3x1 parser = new Parser3x1(lex, br);

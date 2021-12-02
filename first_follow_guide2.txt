@@ -15,7 +15,7 @@ S   -> { SL }
 SP  -> end
 SP  -> else S end
 
-I   -> id I
+I   -> id IP
 
 IP  -> , id IP
 IP  -> epsilon
@@ -60,7 +60,7 @@ FOLLOW[SLP] = eof }
 FOLLOW[S]   = eof ; } end else
 FOLLOW[SP]  = eof ; } end else
 FOLLOW[I]   = eof ; } end else )
-FOLLOW[IP]  = 
+FOLLOW[IP]  = eof ; } end else )
 FOLLOW[B]   = )
 FOLLOW[E]   = to ) , + - * / num id
 FOLLOW[EL]  = )
@@ -85,10 +85,10 @@ GUIDA[S   -> { SL }]        = {
 GUIDA[SP  -> end]           = end
 GUIDA[SP  -> else S end]    = else
 
-GUIDA[I   -> id I]          = id
+GUIDA[I   -> id IP]          = id
 
 GUIDA[IP  -> , id IP]       = ,
-GUIDA[IP  -> epsilon]       = 
+GUIDA[IP  -> epsilon]       = eof ; } end else )
 
 GUIDA[B   -> relop E E]     = relop
 

@@ -28,41 +28,40 @@ public class Parser3x2 {
             error("syntax error");
     }
 
-    // GUIDA[prog -> statlist EOF] <== FIRST[stat]
+    // FINALLY funziona :D, se hai domande chiedi pure, adesso ho finalmente capito come farli e sono super easy
     public void prog() {
         switch (look.tag) {
+            /*
+             * GUIDA[<prog> := <statlist>EOF] = FIRST[<stat>]
+             * FIRST[<stat>] = {assign} U {print} U {read} U {while} U {if} U {{}
+             */
             case Tag.ASSIGN:
-                match(Tag.ASSIGN);
+                // no match because the production does not ask us to
                 statlist();
                 match(Tag.EOF);
                 break;
 
             case Tag.PRINT:
-                match(Tag.PRINT);
                 statlist();
                 match(Tag.EOF);
                 break;
 
             case Tag.READ:
-                match(Tag.READ);
                 statlist();
                 match(Tag.EOF);
                 break;
 
             case Tag.WHILE:
-                match(Tag.WHILE);
                 statlist();
                 match(Tag.EOF);
                 break;
 
             case Tag.IF:
-                match(Tag.IF);
                 statlist();
                 match(Tag.EOF);
                 break;
 
             case '{':
-                match(Tag.LPG);
                 statlist();
                 match(Tag.EOF);
                 break;
@@ -73,41 +72,39 @@ public class Parser3x2 {
         }
     }
 
-    // GUIDA[statlist -> stat statlistp] <== FIRST[stat]
     public void statlist() {
-        switch (look.tag) {
+         switch (look.tag) {
+            /*
+             * GUIDA[<statlist> := <stat><statlistp>] = FIRST[<stat>]
+             * FIRST[<stat>] = {assign} U {print} U {read} U {while} U {if} U {{}
+             */
             case Tag.ASSIGN:
-                match(Tag.ASSIGN);
+                // same as before, we must not match here
                 stat();
                 statlistp();
                 break;
 
             case Tag.PRINT:
-                match(Tag.PRINT);
                 stat();
                 statlistp();
                 break;
 
             case Tag.READ:
-                match(Tag.READ);
                 stat();
                 statlistp();
                 break;
 
             case Tag.WHILE:
-                match(Tag.WHILE);
                 stat();
                 statlistp();
                 break;
 
             case Tag.IF:
-                match(Tag.IF);
                 stat();
                 statlistp();
                 break;
 
             case '{':
-                match(Tag.LPG);
                 stat();
                 statlistp();
                 break;
@@ -119,20 +116,18 @@ public class Parser3x2 {
 
     public void statlistp() {
         switch (look.tag) {
-           // GUIDA[statlistp -> ; stat statlistp] ==> FIRST[statlistp]
-		case ';':
+            // GUIDA[<statlistp> := ;<stat><statlistp>] = FIRST[<statlistp>] = {;}
+            case ';':
                 match(Tag.SEM);
                 stat();
                 statlistp();
                 break;
 
-		// GUIDA[statlistp] -> epsilon] = {EOF} U {}}
-            case '}':
-                match(Tag.RPG);
+            // GUIDA[<statlistp>] := ε] = {EOF} U {}}
+            case -1:
                 break;
 
-            case -1:
-                match(Tag.EOF);
+            case '}':
                 break;
 
             default:
@@ -143,6 +138,7 @@ public class Parser3x2 {
 
     public void stat() {
         switch (look.tag) {
+            // GUIDA[<stat> := assign<expr>to<idlist>] = {assign}
             case Tag.ASSIGN:
                 match(Tag.ASSIGN);
                 expr();
@@ -150,13 +146,15 @@ public class Parser3x2 {
                 idlist();
                 break;
 
+            // GUIDA[<stat> := print(<expr>)] = {print}
             case Tag.PRINT:
-                match(Tag.READ);
+                match(Tag.PRINT);
                 match(Tag.LPT);
                 exprlist();
                 match(Tag.RPT);
                 break;
 
+            // GUIDA[<stat> := read(<expr>)] = {read}
             case Tag.READ:
                 match(Tag.READ);
                 match(Tag.LPT);
@@ -164,6 +162,7 @@ public class Parser3x2 {
                 match(Tag.RPT);
                 break;
 
+            // GUIDA[<stat> := while(<bexpr>)] = {while}
             case Tag.WHILE:
                 match(Tag.WHILE);
                 match(Tag.LPT);
@@ -172,6 +171,7 @@ public class Parser3x2 {
                 stat();
                 break;
 
+            // GUIDA[<stat> := if(<bexpr>)<stat><statp>] = {if}
             case Tag.IF:
                 match(Tag.IF);
                 match(Tag.LPT);
@@ -181,6 +181,7 @@ public class Parser3x2 {
                 statp();
                 break;
 
+            // GUIDA[<stat> := {<statlist>}] = {{}
             case '{':
                 match(Tag.LPG);
                 statlist();
@@ -194,11 +195,14 @@ public class Parser3x2 {
 
     public void statp() {
         switch (look.tag) {
+            // GUIDA[<statp> := end] = {end}
             case Tag.END:
                 match(Tag.END);
                 break;
 
+            // GUIDA[<statp> := else<stat>end] = {else}
             case Tag.ELSE:
+                match(Tag.ELSE);
                 stat();
                 match(Tag.END);
                 break;
@@ -211,6 +215,7 @@ public class Parser3x2 {
 
     public void idlist() {
         switch (look.tag) {
+            // GUIDA[<idlist> := ID<idlistp>] = {ID}
             case Tag.ID:
                 match(Tag.ID);
                 idlistp();
@@ -224,26 +229,33 @@ public class Parser3x2 {
 
     public void idlistp() {
         switch (look.tag) {
+            // GUIDA[<idlistp> := ,ID<idlistp>] = {,}
             case ',':
                 match(Tag.COM);
                 match(Tag.ID);
                 idlistp();
                 break;
 
-            case '}':
-                match(Tag.RPG);
+            /*
+             * GUIDA[<idlistp> := ε] = FOLLOW[<idlistp>]
+             * FOLLOW[<idlistp>] = {EOF} U {;} U {}} U {end} U {else} U {)}
+             */
+            case -1:
                 break;
 
-            case (';'):
-                match(Tag.SEM);
+            case ';':
+                break;
+
+            case '}':
                 break;
 
             case Tag.END:
-                match(Tag.END);
+                break;
+
+            case Tag.ELSE:
                 break;
 
             case ')':
-                match(Tag.RPT);
                 break;
 
             default:
@@ -254,6 +266,7 @@ public class Parser3x2 {
 
     public void bexpr() {
         switch (look.tag) {
+            // GUIDA[<bexpr> := RELOP<expr><expr>] = {RELOP}
             case Tag.RELOP:
                 match(Tag.RELOP);
                 expr();
@@ -268,6 +281,7 @@ public class Parser3x2 {
 
     public void expr() {
         switch (look.tag) {
+            // GUIDA[<expr> := +(<exprlist>)] = {+}
             case '+':
                 match(Tag.SUM);
                 match(Tag.LPT);
@@ -275,12 +289,14 @@ public class Parser3x2 {
                 match(Tag.RPT);
                 break;
 
+            // GUIDA[<expr> := -<expr><expr>] = {-}
             case '-':
                 match(Tag.SUB);
                 expr();
                 expr();
                 break;
 
+            // GUIDA[<expr> := *(<exprlist>)] = {*}
             case '*':
                 match(Tag.MUL);
                 match(Tag.LPT);
@@ -288,18 +304,21 @@ public class Parser3x2 {
                 match(Tag.RPT);
                 break;
 
+            // GUIDA[<expr> := /<expr><expr>] = {/}
             case '/':
                 match(Tag.DIV);
                 expr();
                 expr();
                 break;
 
-            case Tag.ID:
-                match(Tag.ID);
-                break;
-
+            // GUIDA[<expr> := ID] = {ID}
             case Tag.NUM:
                 match(Tag.NUM);
+                break;
+
+            // GUIDA[<expr> := NUM] = {NUM}
+            case Tag.ID:
+                match(Tag.ID);
                 break;
 
             default:
@@ -310,44 +329,37 @@ public class Parser3x2 {
 
     public void exprlist() {
         switch (look.tag) {
+            /*
+             * GUIDA[<exprlist> := <expr><exprlistp>] = FIRST[<expr>]
+             * FIRST[<expr>] = {+} U {-} U {*} U {/} U {NUM} U {ID}
+             */
             case '+':
-                match(Tag.SUM);
+                // same as before we recognize the tags but avoid matching any of them
                 expr();
                 exprlistp();
                 break;
 
             case '-':
-                match(Tag.SUB);
                 expr();
                 exprlistp();
                 break;
 
             case '*':
-                match(Tag.MUL);
                 expr();
                 exprlistp();
                 break;
 
             case '/':
-                match(Tag.DIV);
-                expr();
-                exprlistp();
-                break;
-
-            case Tag.ID:
-                match(Tag.ID);
                 expr();
                 exprlistp();
                 break;
 
             case Tag.NUM:
-                match(Tag.NUM);
                 expr();
                 exprlistp();
                 break;
 
-            case ',':
-                match(Tag.COM);
+            case Tag.ID:
                 expr();
                 exprlistp();
                 break;
@@ -360,10 +372,15 @@ public class Parser3x2 {
 
     public void exprlistp() {
         switch (look.tag) {
+            // GUIDA[<exprlistp> := ,<expr><exprlistp>] = {,}
             case ',':
                 match(Tag.COM);
                 expr();
                 exprlistp();
+                break;
+
+            // GUIDA[<exprlistp> := ε] = FOLLOW[<exprlistp>] = {)}
+            case ')':
                 break;
 
             default:
@@ -373,8 +390,9 @@ public class Parser3x2 {
 
     public static void main(String[] args) {
         Lexer lex = new Lexer();
-        String path = "C:\\Users\\occhi\\Github\\university\\LFT_lab\\File_Prova\\euclid.lft"; // il percorso del file da
-                                                                                              // leggere
+        String path = "C:\\Users\\occhi\\Github\\university\\LFT_lab\\File_Prova\\max_tre_num.lft"; // il percorso del file
+                                                                                               // da
+                                                                                               // leggere
         try {
             BufferedReader br = new BufferedReader(new FileReader(path));
             Parser3x2 parser = new Parser3x2(lex, br);
