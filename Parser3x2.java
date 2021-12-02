@@ -28,7 +28,7 @@ public class Parser3x2 {
             error("syntax error");
     }
 
-    // GUIDA(prog) <== FIRST(stat)
+    // GUIDA[prog -> statlist EOF] <== FIRST[stat]
     public void prog() {
         switch (look.tag) {
             case Tag.ASSIGN:
@@ -73,7 +73,7 @@ public class Parser3x2 {
         }
     }
 
-    // GUIDA(statlist) <== FIRST(stat)
+    // GUIDA[statlist -> stat statlistp] <== FIRST[stat]
     public void statlist() {
         switch (look.tag) {
             case Tag.ASSIGN:
@@ -119,23 +119,26 @@ public class Parser3x2 {
 
     public void statlistp() {
         switch (look.tag) {
-            case ';':
+           // GUIDA[statlistp -> ; stat statlistp] ==> FIRST[statlistp]
+		case ';':
                 match(Tag.SEM);
                 stat();
                 statlistp();
                 break;
 
+		// GUIDA[statlistp] -> epsilon] = {EOF} U {}}
             case '}':
                 match(Tag.RPG);
                 break;
 
-            case Tag.END:
-                match(Tag.END);
+            case -1:
+                match(Tag.EOF);
                 break;
 
             default:
                 error("Error in statlistp");
         }
+
     }
 
     public void stat() {
