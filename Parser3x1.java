@@ -32,7 +32,6 @@ public class Parser3x1 {
     /// GUIDA(start)
     public void start() {
         switch (look.tag) {
-
             case '(':
                 expr();
                 match(Tag.EOF);
@@ -51,7 +50,6 @@ public class Parser3x1 {
     /// FIRST(expr) = FIRST(term) = FIRST(fact) = {NUM} U {(} <== GUIDA(expr)
     private void expr() {
         switch (look.tag) {
-
             case '(':
                 term();
                 exprp();
@@ -70,7 +68,6 @@ public class Parser3x1 {
 
     private void exprp() {
         switch (look.tag) {
-
             // GUIDA[<exprp> --> +<term><exprp>] = {+}
             case '+':
                 match(Tag.SUM);
@@ -103,7 +100,6 @@ public class Parser3x1 {
     /// FIRST(term) = FIRST(fact) = {NUM} U {(} <== GUIDA(term)
     private void term() {
         switch (look.tag) {
-
             case '(':
                 fact();
                 termp();
@@ -123,7 +119,6 @@ public class Parser3x1 {
 
     private void termp() {
         switch (look.tag) {
-
             // GUIDA(termp --> *<fact><exprp>) ==> {*}
             case '*':
                 match(Tag.MUL);
@@ -179,7 +174,7 @@ public class Parser3x1 {
 
     public static void main(String[] args) {
         Lexer lex = new Lexer();
-        String path = "C:\\Users\\occhi\\Github\\university\\LFT_lab\\File_Prova\\prova.lft"; // il percorso del file da
+        String path = "C:\\Users\\occhi\\Github\\university\\LFT_lab\\File_Prova\\prova2.lft"; // il percorso del file da
                                                                                               // leggere
         try {
             BufferedReader br = new BufferedReader(new FileReader(path));

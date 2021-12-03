@@ -1,46 +1,57 @@
-$ E FOLLOW(start)
-FIRST(EOF) E FOLLOW(expr)
+S  -> E eof
 
-FOLLOW(expr) c= FOLLOW(term)
-FOLLOW(expr) c= FOLLOW(exprp)
+E  -> T EP
 
-FOLLOW(exprp) c= FOLLOW(term)
+EP -> + T EP
+EP -> - T EP
+EP -> epsilon
 
-FOLLOW(term) c= FOLLOW(fact)
-FOLLOW(term) c= FOLLOW(termp)
+T  -> F TP
 
-FOLLOW(termp) c= FOLLOW(fact)
+TP -> * F TP
+TP -> / F TP
+TP -> epsilon
 
-FIRST()) E FOLLOW(expr)
+F  -> ( E )
+F  -> num
 
+------------------------------------------
 
-$ E FOLLOW(start)
-FOLLOW(expr) c= FOLLOW(exprp) c= FOLLOW(term) c= FOLLOW(termp) c= FOLLOW(fact) 
-{)} U {EOF} E FOLLOW(expr) c= FOLLOW(term)
+EPS = EP TP
 
+------------------------------------------
 
+FIRST[S]  = ( num
+FIRST[E]  = ( num
+FIRST[T]  = ( num
+FIRST[EP] = + -
+FIRST[F]  = ( num
+FIRST[TP] = * /
 
+------------------------------------------
 
+FOLLOW[S]  =
+FOLLOW[E]  = eof )
+FOLLOW[T]  = eof + - )
+FOLLOW[EP] = eof )
+FOLLOW[F]  = eof + - * / )
+FOLLOW[TP] = eof + - )
 
+------------------------------------------
 
+GUIDA[S ->  E eof]   = ( num
 
+GUIDA[E ->  T EP]    = ( num
 
-Guida(Start-> <expr>EOF)=FIRST(START)={(,NUM}
+GUIDA[EP ->  + T EP] = +
+GUIDA[EP ->  - T EP] = -
+GUIDA[EP -> epsilon] = eof )
 
-Guida(Expr-> <term><exprp>)=FIRST(TERM)={(,NUM}
+GUIDA[T ->  F TP]    = ( num
 
-GUIDA(EXPRP-> +<term><exprp>)=FIRST(+)={+}
-GUIDA(EXPRP-> -<term><exprp>)=FIRST(-)={-}
-GUIDA(EXPRP-> epsilon)=FIRST(epsilon) U FOLLOW(EXPRP)={),EOF}
+GUIDA[TP ->  * F TP] = *
+GUIDA[TP ->  / F TP] = /
+GUIDA[TP -> epsilon] = eof + - )
 
-GUIDA(TERM-><fact><termp)=FIRST(FACT)={(,NUM}
-
-
-GUIDA(TERMP-> *<fact><exprp>)=FIRST(*)={*}
-GUIDA(TERMP-> /<fact><exprp>)=FIRST(/)={/}
-GUIDA(TERMP-> epsilon)=FIRST(epsilon) U FOLLOW(EXPRP)={),EOF}
-
-GUIDA(FACT-> (<expr>) = FIRST( "(" ) = {(}
-GUIDA(FACT-> NUM) = FIRST(NUM) = {NUM} 
-
-
+GUIDA[F ->  ( E )]   = (
+GUIDA[F ->  num]     = num

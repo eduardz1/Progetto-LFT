@@ -210,7 +210,7 @@ public class Lexer {
                     number+=peek;
                     readch(br);
                 }
-                return new Word(Tag.NUM, number);
+                return new NumberTok(Tag.NUM, number);
 
             } else {
                 System.err.println("Erroneous character: " + peek);
