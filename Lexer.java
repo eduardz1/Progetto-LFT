@@ -77,7 +77,7 @@ public class Lexer {
                 System.err.println("Erroneous comment");
                 return null;
             }
-            peek = ' ';
+            // peek = ' ';
             return Token.div;
 
         case ';':

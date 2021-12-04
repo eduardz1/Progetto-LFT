@@ -158,20 +158,24 @@ public class Valutatore {
         switch (look.tag) {
             case '*':
                 match(Tag.MUL);
-                /*fact_val = fact();
-                termp1_i = termp_i * fact_val;
-                termp1_val = termp(termp1_i);
-                termp_val = termp1_val;
-                return termp_val; */
+                /*
+                 * fact_val = fact();
+                 * termp1_i = termp_i * fact_val;
+                 * termp1_val = termp(termp1_i);
+                 * termp_val = termp1_val;
+                 * return termp_val;
+                 */
                 return termp(termp_i * fact());
 
             case '/':
                 match(Tag.DIV);
-                /*fact_val = fact();
-                termp1_i = termp_i / fact_val;
-                termp1_val = termp(termp1_i);
-                termp_val = termp1_val;
-                return termp_val; */
+                /*
+                 * fact_val = fact();
+                 * termp1_i = termp_i / fact_val;
+                 * termp1_val = termp(termp1_i);
+                 * termp_val = termp1_val;
+                 * return termp_val;
+                 */
                 return termp(termp_i / fact());
 
             case '+':
@@ -205,8 +209,8 @@ public class Valutatore {
                 return fact_val;
 
             case Tag.NUM:
-                fact_val = ((NumberTok)look).value;
-                match(Tag.NUM);    
+                fact_val = ((NumberTok) look).value;
+                match(Tag.NUM);
                 return fact_val;
 
             default:
@@ -218,7 +222,8 @@ public class Valutatore {
 
     public static void main(String[] args) {
         Lexer lex = new Lexer();
-        String path = "C:\\Users\\occhi\\Github\\university\\LFT_lab\\File_Prova\\prova2.lft"; // il percorso del file da leggere
+        String path = "C:\\Users\\occhi\\Github\\university\\LFT_lab\\File_Prova\\prova.lft"; // il percorso del file da
+                                                                                              // leggere
         try {
             BufferedReader br = new BufferedReader(new FileReader(path));
             Valutatore valutatore = new Valutatore(lex, br);
