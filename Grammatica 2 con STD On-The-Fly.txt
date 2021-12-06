@@ -1,4 +1,4 @@
-P   -> SL eof
+P   -> {statlist.next=newlabel()} SL {emitlabel(statlist.next)} eof  
 
 SL  -> S SLP
 
@@ -23,11 +23,11 @@ IP  -> epsilon
 B   -> relop E E
 
 E   -> + ( EL )
-E   -> - E E
+E   -> - E E {emit(isub)}
 E   -> * ( EL )
-E   -> / E E
-E   -> num
-E   -> id
+E   -> / E E {emit(idiv)}
+E   -> {emit(ldc, val)} num 
+E   -> {emit(iload, id_addr)} id
 
 EL  -> E ELP
 
