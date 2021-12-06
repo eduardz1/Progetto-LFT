@@ -336,6 +336,8 @@ public class Translator {
     }
 
     private void expr() {
+        int counter_operators = -1;
+
         switch (look.tag) {
             case '+':
                 {
@@ -359,18 +361,16 @@ public class Translator {
                 break;
             
             case '*':
-                {
                     match(Tag.MUL);
                     match(Tag.LPT);
                 
-                    int counter_operators;
-                    counter_operators = exprlist();
+                    exprlist();
+
                     while(counter_operators > 0)
                         code.emit(OpCode.imul);
 
                     match(Tag.RPT);
                     break;
-                }
 
             case '/':
                 match('/');
@@ -380,6 +380,8 @@ public class Translator {
                 break;
 
             case Tag.NUM:
+                counter_operators++; // count the number of operators, 1 means 0 and no operations defined
+                
                 code.emit(OpCode.ldc,((NumberTok)look).value);
                 match(Tag.NUM);
                 break;
@@ -399,7 +401,7 @@ public class Translator {
         }
     }
 
-    private int exprlist(){
+    private void exprlist(){
         // return 0 when only one operand is present after + - * /
         switch (look.tag) {
             /*
@@ -444,7 +446,21 @@ public class Translator {
     }
 
     private void exprlistp(){
+        switch (look.tag) {
+            // GUIDA[<exprlistp> := ,<expr><exprlistp>] = {,}
+            case ',':
+                match(Tag.COM);
+                expr();
+                exprlistp();
+                break;
 
+            // GUIDA[<exprlistp> := ε] = FOLLOW[<exprlistp>] = {)}
+            case ')':
+                break;
+
+            default:
+                error("Error in exprlistp");
+        }
     }
     // ... completare ...
 }
