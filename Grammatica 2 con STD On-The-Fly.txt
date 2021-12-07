@@ -1,6 +1,6 @@
 P   -> {statlist.next=newlabel()} SL {emitlabel(statlist.next)} eof  
 
-SL  -> S SLP
+SL  -> S SLP {S.next=newlabel() SLP.next=SLP.next SLP.code=S.code}{S.next:SLP.code}
 
 SLP -> ; S SLP
 SLP -> epsilon
@@ -8,9 +8,9 @@ SLP -> epsilon
 S   -> assign E to I
 S   -> print ( EL )
 S   -> read ( I )
-S   -> while ( B )
+S   -> while ( B ) {B.true=newlabel() B.false=S.next S1.next=newlabel() S.code=S1.next:B.code || B.true:S1.code}
 S   -> if ( B ) S SP
-S   -> { SL }
+S   -> { SL } {SL.next=S.next S.code=SL.code}
 
 SP  -> end
 SP  -> else S end
@@ -18,7 +18,7 @@ SP  -> else S end
 I   -> id IP
 
 IP  -> , id IP
-IP  -> epsilon
+IP  -> epsilon {IP.code=goto IP.next}
 
 B   -> relop E E
 
