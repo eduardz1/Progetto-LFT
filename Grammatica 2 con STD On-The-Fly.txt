@@ -20,7 +20,7 @@ I   -> id IP
 IP  -> , id IP
 IP  -> epsilon {IP.code=goto IP.next}
 
-B   -> relop E E
+B   -> relop E1 E2 {B.code=E1.code || E2.code || if_icmp(relop) B.true || goto B.false}
 
 E   -> + ( EL )
 E   -> - E E {emit(isub)}

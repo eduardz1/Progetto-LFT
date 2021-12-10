@@ -288,29 +288,33 @@ public class Translator {
         switch(look.tag){
             case Tag.RELOP:
                 {
-                    switch(((Word)look).lexeme){
+                    String relop = ((Word)look).lexeme;
+
+                    match(Tag.RELOP);
+
+                    switch(relop){
                         case "or":
-                            code.emit(OpCode.if_icmpne, expr_label);
+                            code.emit(OpCode.ior, expr_label);
                             break;
 
                         case "and":
-                            code.emit(OpCode.if_icmpne, expr_label);
+                            code.emit(OpCode.iand, expr_label);
                             break;
 
                         case "lt":
-                            code.emit(OpCode.if_icmpne, expr_label);
+                            code.emit(OpCode.if_icmplt, expr_label);
                             break;
 
                         case "gt":
-                            code.emit(OpCode.if_icmpne, expr_label);
+                            code.emit(OpCode.if_icmpgt, expr_label);
                             break;
 
                         case "eq":
-                            code.emit(OpCode.if_icmpne, expr_label);
+                            code.emit(OpCode.if_icmpeq, expr_label);
                             break;
 
                         case "le":
-                            code.emit(OpCode.if_icmpne, expr_label);
+                            code.emit(OpCode.if_icmple, expr_label);
                             break;
 
                         case "ne":
@@ -318,15 +322,12 @@ public class Translator {
                             break;
                         
                         case "ge":
-                            code.emit(OpCode.if_icmpne, expr_label);
+                            code.emit(OpCode.if_icmpge, expr_label);
                             break;
 
                         default:
                             error("Error in Word.java RELOP definition");
                     }
-                    match(Tag.RELOP);
-                    expr();
-                    expr();
                     break;
                 }
 
