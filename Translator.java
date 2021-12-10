@@ -104,13 +104,14 @@ public class Translator {
         error("Could not switch(look.tag)");
     }
 
-    public void statlist(int lnext_statlist) {
+    public void statlist(int lnext_prog) {
+        int lnext_statlist = code.newlabel();
+        code.emitLabel(lnext_statlist);
+
         switch (look.tag) {
             case Tag.ASSIGN:
                 stat(lnext_statlist);
-                code.emitLabel(lnext_statlist);
                 statlistp(lnext_statlist);
-                code.emitLabel(lnext_statlist);
                 break;
 
             case Tag.PRINT:
@@ -166,22 +167,29 @@ public class Translator {
                 match(Tag.ASSIGN);
                 expr();
                 match(Tag.TO);
-                code.emit(OpCode.istore);
+                idlist(0); // we pass 0 to identify the "assign" case
                 break;
 
-            case Tag.PRINT:
+            case Tag.PRINT: // non acora fatto
                 match(Tag.PRINT);
                 match(Tag.LPT);
                 exprlist();
-                code.emit(OpCode.invokestatic, 1);
                 match(Tag.RPT);
                 break;
 
             case Tag.READ:
                 match(Tag.READ);
                 match('(');
-                idlist();
+                idlist(1); // we pass 1 to identify the "read" case
                 match(')');
+                break;
+
+            case Tag.WHILE:
+                match(Tag.WHILE);
+                match('(');
+                bexpr();
+                match(')');
+                break;
                 
             case Tag.IF:
                 match(Tag.IF);
@@ -223,36 +231,57 @@ public class Translator {
         }
     }
 
-    private void idlist(int lnext_idlist) {
+    private void idlist(int read_assign) {  // read 1, assign 0
         switch (look.tag) {
             case Tag.ID:
-                {int id_addr = st.lookupAddress(((Word) look).lexeme);
-                if (id_addr == -1) {
-                    id_addr = count;
-                    st.insert(((Word) look).lexeme, count++);
+                {
+                    int id_addr = st.lookupAddress(((Word)look).lexeme);
+                    if (id_addr == -1) {
+                        id_addr = count;
+                        if(read_assign == 0) 
+                            st.insert(((Word)look).lexeme, count++);
+                        error("Error in idlist(): Identifier not declared for print: " + ((Word)look).lexeme);
+                    }
+
+                    if(read_assign == 0)
+                        code.emit(OpCode.istore);
+
+                    code.emit(OpCode.iload, id_addr);
+                    code.emit(OpCode.invokestatic, 1);
+
+                    match(Tag.ID);
+                    idlistp(read_assign);
+                    break;
                 }
-                match(Tag.ID);
-                break;}
 
             default:
                 error("Error in idlist");
         }
     }
 
-    private void idlistp(){
+    private void idlistp(int read_assign){
         switch (look.tag) {
             // GUIDA[<idlistp> := ,ID<idlistp>] = {,}
             case ',':
                 {
                     match(Tag.COM);
 
-                    int id_addr = st.lookupAddress((Word)look);
-                    if(id_addr == -1)
-                        error("Error in expr() : identifier not defined");
+                    int id_addr = st.lookupAddress(((Word)look).lexeme);
+                    if(id_addr == -1){
+                        id_addr = count;
+                        if(read_assign == 0)
+                            st.insert(((Word)look).lexeme, count++);
+                        error("Error in expr() : Identifier not defined: " + ((Word)look).lexeme);
+                    }
+
+                    if(read_assign == 0)
+                        code.emit(OpCode.istore);
+
                     code.emit(OpCode.iload, id_addr);
+                    code.emit(OpCode.invokestatic, 1);
+                    
                     match(Tag.ID);
-        
-                    idlistp();
+                    idlistp(read_assign);
                     break;
                 }
 
@@ -284,44 +313,62 @@ public class Translator {
         }
     }
 
-    private void bexpr(int expr_label){
+    private void bexpr(int label_true, int label_false){
         switch(look.tag){
             case Tag.RELOP:
                 {
-                    String relop = ((Word)look).lexeme;
+                    String relop = ((Word)look).lexeme; // save relop value in a local variable because we need to match before the switch case
 
                     match(Tag.RELOP);
 
                     switch(relop){
                         case "or":
-                            code.emit(OpCode.ior, expr_label);
+                            expr(); // we need to write expr1 and expr2 first
+                            expr();
+                            code.emit(OpCode.ior, label_true); // then we verify if it's true and send it to label_true
+                            code.emit(OpCode.goto, label_false); // when it's not true anymore we jump at label_false or skip this instruction directly
                             break;
 
                         case "and":
-                            code.emit(OpCode.iand, expr_label);
+                            expr();
+                            expr();
+                            code.emit(OpCode.iand, label_true);
+                            code.emit(OpCode.goto, label_false);
                             break;
 
                         case "lt":
+                            expr();
+                            expr();
                             code.emit(OpCode.if_icmplt, expr_label);
                             break;
 
                         case "gt":
+                            expr();
+                            expr();
                             code.emit(OpCode.if_icmpgt, expr_label);
                             break;
 
                         case "eq":
+                            expr();
+                            expr();
                             code.emit(OpCode.if_icmpeq, expr_label);
                             break;
 
                         case "le":
+                            expr();
+                            expr();
                             code.emit(OpCode.if_icmple, expr_label);
                             break;
 
                         case "ne":
+                            expr();
+                            expr();
                             code.emit(OpCode.if_icmpne, expr_label);
                             break;
                         
                         case "ge":
+                            expr();
+                            expr();
                             code.emit(OpCode.if_icmpge, expr_label);
                             break;
 
