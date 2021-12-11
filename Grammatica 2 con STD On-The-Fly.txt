@@ -8,7 +8,7 @@ SLP -> epsilon
 S   -> assign E to I
 S   -> print ( EL )
 S   -> read ( I )
-S   -> while ( B ) {B.true=newlabel() B.false=S.next S1.next=newlabel() S.code=S1.next:B.code || B.true:S1.code}
+S   -> while ( B ) S {B.true=newlabel() B.false=S.next S1.next=newlabel() S.code=S1.next:B.code || B.true:S1.code}
 S   -> if ( B ) S SP
 S   -> { SL } {SL.next=S.next S.code=SL.code}
 

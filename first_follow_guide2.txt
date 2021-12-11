@@ -8,7 +8,7 @@ SLP -> epsilon
 S   -> assign E to I
 S   -> print ( EL )
 S   -> read ( I )
-S   -> while ( B )
+S   -> while ( B ) S
 S   -> if ( B ) S SP
 S   -> { SL }
 
