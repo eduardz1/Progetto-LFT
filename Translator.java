@@ -266,9 +266,10 @@ public class Translator {
                 match(Tag.ID);
 
                 if (read_assign == 0) {
-                    code.emit(OpCode.istore);
+                    code.emit(OpCode.istore, id_addr);
                 } else {
                     code.emit(OpCode.invokestatic, 0);
+                    code.emit(OpCode.istore, id_addr);
                 }
 
                 idlistp(read_assign);
@@ -295,9 +296,10 @@ public class Translator {
                 }
                 match(Tag.ID);
                 if (read_assign == 0) {
-                    code.emit(OpCode.istore);
+                    code.emit(OpCode.istore, id_addr);
                 } else {
                     code.emit(OpCode.invokestatic, 0);
+                    code.emit(OpCode.istore, id_addr);
                 }
 
                 /*
@@ -409,6 +411,7 @@ public class Translator {
                 // code.emit(OpCode.imul);
 
                 match(Tag.RPT);
+                code.emit(OpCode.iadd);
                 break;
             }
 
@@ -429,6 +432,7 @@ public class Translator {
                 // code.emit(OpCode.imul);
 
                 match(Tag.RPT);
+                code.emit(OpCode.imul);
                 break;
 
             case '/':
@@ -471,12 +475,12 @@ public class Translator {
             case '+', '-', '*', '/', Tag.NUM, Tag.ID:
                 // same as before we recognize the tags but avoid matching any of them
                 expr();
-                if (sum_print_mul == 0)
-                    code.emit(OpCode.iadd);
-                else if (sum_print_mul == 1)
+                // if (sum_print_mul == 0)
+                // code.emit(OpCode.iadd);
+                if (sum_print_mul == 1)
                     code.emit(OpCode.invokestatic, 1);
-                else
-                    code.emit(OpCode.imul);
+                // else
+                // code.emit(OpCode.imul);
                 exprlistp(sum_print_mul);
                 break;
 
@@ -510,8 +514,8 @@ public class Translator {
 
     public static void main(String[] args) {
         Lexer lex = new Lexer();
-        String path = "C:\\Users\\occhi\\Github\\university\\LFT_lab\\File_Prova\\max_tre_num.lft"; // il percorso del
-                                                                                                    // file
+        String path = "C:\\Users\\occhi\\Github\\university\\LFT_lab\\File_Prova\\factorial.lft"; // il percorso del
+                                                                                                  // file
         // da
         // leggere
         try {
