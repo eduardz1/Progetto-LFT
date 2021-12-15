@@ -1,5 +1,6 @@
 import java.io.*;
 
+// dobbiamo scrivere le azioni semantiche per ogni produzione
 public class Translator {
     private Lexer lex;
     private BufferedReader pbr;
@@ -33,12 +34,16 @@ public class Translator {
             error("syntax error");
     }
 
+    /*
+     * GUIDA[<prog> := <statlist>EOF] = FIRST[<stat>]
+     * FIRST[<stat>] = {assign} U {print} U {read} U {while} U {if} U {{}
+     */
     public void prog() {
         int lnext_prog = code.newLabel();
 
         switch (look.tag) {
             case Tag.ASSIGN, Tag.PRINT, Tag.READ, Tag.WHILE, Tag.IF, Tag.RPG:
-                statlist(lnext_prog); // the label is utilized for JMP and conditinal JMP
+                statlist(lnext_prog); // the label is utilized for JMP and conditional JMP
                 code.emitLabel(lnext_prog);
                 match(Tag.EOF);
                 try {
@@ -49,85 +54,37 @@ public class Translator {
                 break;
 
             default:
-                // error("Error in prog");
+                error("Error in prog");
         }
-
-        // error("Could not switch(look.tag)");
     }
 
+    /*
+     * GUIDA[<statlist> := <stat><statlistp>] = FIRST[<stat>]
+     * FIRST[<stat>] = {assign} U {print} U {read} U {while} U {if} U {{}
+     */
     public void statlist(int lnext_prog) {
-        // int lnext_statlist = code.newLabel();
-
         switch (look.tag) {
-            case Tag.ASSIGN: // complete
+            case Tag.ASSIGN, Tag.PRINT, Tag.READ, Tag.WHILE, Tag.IF, Tag.RPG:
                 stat();
-                // code.emitLabel(lnext_statlist);
                 statlistp();
-                // code.emitLabel(lnext_statlist);
-                break;
-
-            case Tag.PRINT:
-                stat();
-                // code.emitLabel(lnext_statlist);
-                statlistp();
-                // code.emitLabel(lnext_statlist);
-                break;
-
-            case Tag.READ: // complete
-                stat();
-                // code.emitLabel(lnext_statlist);
-                statlistp();
-                // code.emitLabel(lnext_statlist);
-                break;
-
-            case Tag.WHILE: /*
-                             * LAB 1:
-                             * bexpr
-                             * ifcmp
-                             * <stat>
-                             * LAB 2:
-                             * <stat>
-                             */
-
-                stat();
-                // code.emitLabel(lnext_statlist);
-                statlistp();
-                // code.emitLabel(lnext_statlist);
-                break;
-
-            case Tag.IF:
-                stat();
-                // code.emitLabel(lnext_statlist);
-                statlistp();
-                // code.emitLabel(lnext_statlist);
-                break;
-
-            case '{':
-                stat();
-                // code.emitLabel(lnext_statlist);
-                statlistp();
-                // code.emitLabel(lnext_statlist);
                 break;
 
             default:
-                // error("Error in statlist");
+                error("Error in statlist");
         }
     }
 
     public void statlistp() {
         switch (look.tag) {
-            // GUIDA[<statlistp> := ;<stat><statlistp>] = FIRST[<statlistp>] = {;}
-            case ';':
+            /* GUIDA[<statlistp> := ;<stat><statlistp>] = FIRST[<statlistp>] = {;} */
+            case Tag.SEM:
                 match(Tag.SEM);
                 stat();
                 statlistp();
                 break;
 
-            // GUIDA[<statlistp>] := ε] = {EOF} U {}}
-            case -1:
-                break;
-
-            case '}':
+            /* GUIDA[<statlistp>] := ε] = {EOF==-1} U {}} */
+            case Tag.EOF, Tag.RPG:
                 break;
 
             default:
@@ -136,60 +93,62 @@ public class Translator {
 
     }
 
-    public void stat() { // probably lnext_statlist useless
-        // code.emitLabel(code.newLabel());
-
+    public void stat() {
         switch (look.tag) {
-
+            /* GUIDA[<stat> := assign<expr>to<idlist>] = {assign} */
             case Tag.ASSIGN:
                 match(Tag.ASSIGN);
                 expr();
                 match(Tag.TO);
-                idlist(0); // we pass 0 to identify the "assign" case
-
-                // code.emitLabel(lnext_stat);
+                idlist(0); // pass 0 to identify the "assign" case
                 break;
 
+            /* GUIDA[<stat> := print(<expr>)] = {print} */
             case Tag.PRINT:
                 match(Tag.PRINT);
                 match(Tag.LPT);
-                exprlist(1);
+                exprlist(1); /*
+                              * pass 1 to identify print, better to emit label in exprlist to manage cases
+                              * like "print(a,b,c)"
+                              */
                 match(Tag.RPT);
-
-                // code.emitLabel(lnext_stat);
                 break;
 
+            /* GUIDA[<stat> := read(<expr>)] = {read} */
             case Tag.READ:
                 match(Tag.READ);
                 match('(');
-                idlist(1); // we pass 1 to identify the "read" case
+                idlist(1); // pass 1 to identify the "read" case
                 match(')');
-
-                // code.emitLabel(lnext_stat);
                 break;
 
+            /* GUIDA[<stat> := while(<bexpr>)] = {while} */
             case Tag.WHILE: {
-                match(Tag.WHILE);
-                match('(');
-
                 int while_true = code.newLabel();
                 int while_false = code.newLabel();
                 int while_start = code.newLabel();
-
+                /*
+                 * create while_start as first label so we can JMP to it after the code in the
+                 * while is executed, label is emitted before while_true and while_false, while
+                 * false is emitted after the while code (<stat>)
+                 */
                 code.emitLabel(while_start);
 
+                match(Tag.WHILE);
+                match('(');
                 bexpr(while_true, while_false);
                 match(')');
 
                 code.emitLabel(while_true);
 
-                stat(); // while_start come parametro maybe
+                stat();
 
                 code.emit(OpCode.GOto, while_start);
                 code.emitLabel(while_false);
                 break;
             }
 
+            /* GUIDA[<stat> := if(<bexpr>)<stat><statp>] = {if} */
             case Tag.IF: { /*
                             * if still to be worked on, label in wrong order, need to add goto to jmp
                             * if(false) condition instead of executing it after if(true)
@@ -211,12 +170,11 @@ public class Translator {
                 break;
             }
 
+            /* GUIDA[<stat> := {<statlist>}] = {{} */
             case '{':
                 match(Tag.LPG);
-                statlist(0);
+                statlist(0); // not sure about that one
                 match(Tag.RPG);
-
-                // code.emitLabel(lnext_stat);
                 break;
 
             default:
@@ -226,13 +184,17 @@ public class Translator {
 
     public void statp(int if_false) {
         switch (look.tag) {
+            /* GUIDA[<statp> := end] = {end} */
             case Tag.END:
                 match(Tag.END);
+
                 code.emitLabel(if_false);
                 break;
 
+            /* GUIDA[<statp> := else<stat>end] = {else} */
             case Tag.ELSE: {
                 code.emitLabel(if_false);
+
                 match(Tag.ELSE);
                 stat();
                 match(Tag.END);
@@ -244,36 +206,25 @@ public class Translator {
         }
     }
 
+    /* GUIDA[<idlist> := ID<idlistp>] = {ID} */
     private void idlist(int read_assign) { // read 1, assign 0
         switch (look.tag) {
             case Tag.ID: {
+                /*
+                 * we check with lookupAddress if the ID is already present in our memory, if
+                 * not (id_addr == -1), insert it as new ID
+                 */
                 int id_addr = st.lookupAddress(((Word) look).lexeme);
                 if (id_addr == -1) {
                     id_addr = count;
-                    // if (read_assign == 0)
                     st.insert(((Word) look).lexeme, count++);
-                    // error("Error in idlist(): Identifier not declared for print: " + ((Word)
-                    // look).lexeme);
                 }
-
-                /*
-                 * if (read_assign == 0){
-                 * code.emit(OpCode.istore);
-                 * }
-                 * else
-                 * code.emit(OpCode.invokestatic, 0);
-                 * 
-                 * code.emit(OpCode.iload, id_addr);
-                 */
 
                 match(Tag.ID);
 
-                if (read_assign == 0) {
-                    code.emit(OpCode.istore, id_addr);
-                } else {
-                    code.emit(OpCode.invokestatic, 0);
-                    code.emit(OpCode.istore, id_addr);
-                }
+                if (read_assign == 1)
+                    code.emit(OpCode.invokestatic, 0); // inkevestatic Output/read()I
+                code.emit(OpCode.istore, id_addr);
 
                 idlistp(read_assign);
                 break;
@@ -286,7 +237,7 @@ public class Translator {
 
     private void idlistp(int read_assign) {
         switch (look.tag) {
-            // GUIDA[<idlistp> := ,ID<idlistp>] = {,}
+            /* GUIDA[<idlistp> := ,ID<idlistp>] = {,} */
             case ',': {
                 match(Tag.COM);
 
@@ -318,22 +269,7 @@ public class Translator {
              * GUIDA[<idlistp> := ε] = FOLLOW[<idlistp>]
              * FOLLOW[<idlistp>] = {EOF} U {;} U {}} U {end} U {else} U {)}
              */
-            case -1:
-                break;
-
-            case ';':
-                break;
-
-            case '}':
-                break;
-
-            case Tag.END:
-                break;
-
-            case Tag.ELSE:
-                break;
-
-            case ')':
+            case Tag.EOF, Tag.SEM, Tag.LPG, Tag.END, Tag.ELSE, Tag.LPT:
                 break;
 
             default:
@@ -344,6 +280,7 @@ public class Translator {
 
     private void bexpr(int label_true, int label_false) {
         switch (look.tag) {
+            /* GUIDA[<bexpr> := RELOP<expr><expr>] = {RELOP} */
             case Tag.RELOP: {
                 String relop = ((Word) look).lexeme; // save relop value in a local variable because we need to match
                                                      // before the switch case
@@ -352,7 +289,7 @@ public class Translator {
                 expr();
 
                 switch (relop) {
-                    case "||":
+                    case "||": // still needs to be wroked on
                         code.emit(OpCode.ior); /*
                                                 * then we verify if it's true and send it to label_true when
                                                 * it's not true anymore we jump at label_false or
@@ -360,8 +297,12 @@ public class Translator {
                                                 */
                         break;
 
-                    case "&&":
+                    case "&&": // still needs to be worked on
                         code.emit(OpCode.iand);
+                        break;
+
+                    case "!":
+                        // still needs to be worked on
                         break;
 
                     case "<":
@@ -401,64 +342,59 @@ public class Translator {
     }
 
     private void expr() {
-        // int counter_operators = -1;
-
         switch (look.tag) {
-            case '+': {
+            /* GUIDA[<expr> := +(<exprlist>)] = {+} */
+            case Tag.SUM: {
                 match(Tag.SUM);
                 match(Tag.LPT);
-
-                // int counter_operators;
-                exprlist(0);
-                // while (counter_operators > 0)
-                // code.emit(OpCode.imul);
-
+                exprlist(0); // pass 0 to identify sum
                 match(Tag.RPT);
+
                 code.emit(OpCode.iadd);
                 break;
             }
 
-            case '-':
+            /* GUIDA[<expr> := -<expr><expr>] = {-} */
+            case Tag.SUB:
                 match('-');
                 expr();
                 expr();
                 code.emit(OpCode.isub);
                 break;
 
-            case '*':
+            /* GUIDA[<expr> := *(<exprlist>)] = {*} */
+            case Tag.MUL:
                 match(Tag.MUL);
                 match(Tag.LPT);
-
-                exprlist(2);
-
-                // while (counter_operators > 0)
-                // code.emit(OpCode.imul);
-
+                exprlist(2); // pass 2 to identify mul
                 match(Tag.RPT);
+
                 code.emit(OpCode.imul);
                 break;
 
-            case '/':
-                match('/');
+            /* GUIDA[<expr> := /<expr><expr>] = {/} */
+            case Tag.DIV:
+                match(Tag.DIV);
                 expr();
                 expr();
                 code.emit(OpCode.idiv);
                 break;
 
+            /* GUIDA[<expr> := NUM] = {NUM} */
             case Tag.NUM:
-                // counter_operators++; // count the number of operators, 1 means 0 and no
-                // operations defined
-
                 code.emit(OpCode.ldc, ((NumberTok) look).value);
+
                 match(Tag.NUM);
                 break;
 
+            /* GUIDA[<expr> := ID] = {ID} */
             case Tag.ID: {
+                /* check if ID is was previously decalred, if not output an error */
                 int id_addr = st.lookupAddress(((Word) look).lexeme);
                 if (id_addr == -1)
                     error("Error in expr() : identifier not defined");
-                // code.emit(OpCode.iload, id_addr);
                 code.emit(OpCode.iload, id_addr);
+
                 match(Tag.ID);
                 break;
             }
@@ -469,21 +405,18 @@ public class Translator {
     }
 
     private void exprlist(int sum_print_mul) { /* 0==sum, 1==print, 2==mul */
-        // return 0 when only one operand is present after + - * /
         switch (look.tag) {
             /*
              * GUIDA[<exprlist> := <expr><exprlistp>] = FIRST[<expr>]
              * FIRST[<expr>] = {+} U {-} U {*} U {/} U {NUM} U {ID}
              */
             case '+', '-', '*', '/', Tag.NUM, Tag.ID:
-                // same as before we recognize the tags but avoid matching any of them
                 expr();
-                // if (sum_print_mul == 0)
-                // code.emit(OpCode.iadd);
+
                 if (sum_print_mul == 1)
-                    code.emit(OpCode.invokestatic, 1);
-                // else
-                // code.emit(OpCode.imul);
+                    code.emit(OpCode.invokestatic, 1); // invokestatic Output/print(I)V
+
+                /* we still need to manage the case *(NUM) and +(NUM) */
                 exprlistp(sum_print_mul);
                 break;
 
@@ -495,19 +428,19 @@ public class Translator {
 
     private void exprlistp(int invokestatic) {
         switch (look.tag) {
-            // GUIDA[<exprlistp> := ,<expr><exprlistp>] = {,}
+            /* GUIDA[<exprlistp> := ,<expr><exprlistp>] = {,} */
             case ',':
                 match(Tag.COM);
+
                 if (invokestatic == 1)
-                    code.emit(OpCode.invokestatic, invokestatic);
+                    code.emit(OpCode.invokestatic, 1); // invokestatic Output/print(I)V
+
                 expr();
-                exprlistp(0);
+                exprlistp(0); // need to check that
                 break;
 
-            // GUIDA[<exprlistp> := ε] = FOLLOW[<exprlistp>] = {)}
+            /* GUIDA[<exprlistp> := ε] = FOLLOW[<exprlistp>] = {)} */
             case ')':
-                // if (invokestatic == 1)
-                // code.emit(OpCode.invokestatic, invokestatic);
                 break;
 
             default:
