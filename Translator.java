@@ -190,7 +190,10 @@ public class Translator {
                 break;
             }
 
-            case Tag.IF: {
+            case Tag.IF: { /*
+                            * if still to be worked on, label in wrong order, need to add goto to jmp
+                            * if(false) condition instead of executing it after if(true)
+                            */
                 match(Tag.IF);
                 match(Tag.LPT);
 
