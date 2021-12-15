@@ -38,7 +38,7 @@ public class Instruction {
                 break;
 
             case isub:
-                temp = " isub " + "\n";
+                temp = " isub " + "\n"; 
                 break;
 
             case ineg:
