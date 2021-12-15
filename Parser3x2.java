@@ -28,7 +28,8 @@ public class Parser3x2 {
             error("syntax error");
     }
 
-    // FINALLY funziona :D, se hai domande chiedi pure, adesso ho finalmente capito come farli e sono super easy
+    // FINALLY funziona :D, se hai domande chiedi pure, adesso ho finalmente capito
+    // come farli e sono super easy
     public void prog() {
         switch (look.tag) {
             /*
@@ -73,7 +74,7 @@ public class Parser3x2 {
     }
 
     public void statlist() {
-         switch (look.tag) {
+        switch (look.tag) {
             /*
              * GUIDA[<statlist> := <stat><statlistp>] = FIRST[<stat>]
              * FIRST[<stat>] = {assign} U {print} U {read} U {while} U {if} U {{}
@@ -311,12 +312,12 @@ public class Parser3x2 {
                 expr();
                 break;
 
-            // GUIDA[<expr> := ID] = {ID}
+            // GUIDA[<expr> := NUM] = {NUM}
             case Tag.NUM:
                 match(Tag.NUM);
                 break;
 
-            // GUIDA[<expr> := NUM] = {NUM}
+            // GUIDA[<expr> := ID] = {ID}
             case Tag.ID:
                 match(Tag.ID);
                 break;
@@ -390,9 +391,10 @@ public class Parser3x2 {
 
     public static void main(String[] args) {
         Lexer lex = new Lexer();
-        String path = "C:\\Users\\occhi\\Github\\university\\LFT_lab\\File_Prova\\max_tre_num.lft"; // il percorso del file
-                                                                                               // da
-                                                                                               // leggere
+        String path = "C:\\Users\\occhi\\Github\\university\\LFT_lab\\File_Prova\\max_tre_num.lft"; // il percorso del
+                                                                                                    // file
+        // da
+        // leggere
         try {
             BufferedReader br = new BufferedReader(new FileReader(path));
             Parser3x2 parser = new Parser3x2(lex, br);
