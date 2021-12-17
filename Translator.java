@@ -149,23 +149,27 @@ public class Translator {
             }
 
             /* GUIDA[<stat> := if(<bexpr>)<stat><statp>] = {if} */
-            case Tag.IF: { /*
-                            * if still to be worked on, label in wrong order, need to add goto to jmp
-                            * if(false) condition instead of executing it after if(true)
-                            */
-                match(Tag.IF);
-                match(Tag.LPT);
-
+            case Tag.IF: { 
                 int if_true = code.newLabel();
                 int if_false = code.newLabel();
 
+                /*
+                 * if still to be worked on, label in wrong order, need to add goto to jmp
+                 * if(false) condition instead of executing it after if(true)
+                 */
+                
+                match(Tag.IF);
+                match(Tag.LPT);
+
                 bexpr(if_true, if_false);
                 match(Tag.RPT);
+
                 code.emitLabel(if_true);
 
                 stat();
                 statp(if_false);
 
+                
                 // we emit the label in statp() because of the two cases: end or else
                 break;
             }
@@ -187,17 +191,29 @@ public class Translator {
             /* GUIDA[<statp> := end] = {end} */
             case Tag.END:
                 match(Tag.END);
-
-                code.emitLabel(if_false);
+                code.emit(if_false);
                 break;
+
+            /*
+             * iload x
+             iload y
+             if_icmp l0
+            goto l1(caso falso)
+            l0
+            caso vero
+            l1
+            corpo else
+
+             */
 
             /* GUIDA[<statp> := else<stat>end] = {else} */
             case Tag.ELSE: {
-                code.emitLabel(if_false);
+                code.emit(if_false);
 
                 match(Tag.ELSE);
-                stat();
+                stat(); // S2
                 match(Tag.END);
+
                 break;
             }
 
