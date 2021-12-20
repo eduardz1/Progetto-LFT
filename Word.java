@@ -24,6 +24,7 @@ public class Word extends Token {
 			read = new Word(Tag.READ, "read"), 
 			or = new Word(Tag.OR, "||"), 
 			and = new Word(Tag.AND, "&&"),
+			not = new Word(Tag.NOT, "!"),
 			lt = new Word(Tag.RELOP, "<"), 
 			gt = new Word(Tag.RELOP, ">"), 
 			eq = new Word(Tag.RELOP, "=="),
