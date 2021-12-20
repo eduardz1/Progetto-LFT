@@ -149,7 +149,7 @@ public class Translator {
             }
 
             /* GUIDA[<stat> := if(<bexpr>)<stat><statp>] = {if} */
-            case Tag.IF: { 
+            case Tag.IF: {
                 int if_true = code.newLabel();
                 int if_false = code.newLabel();
                 int if_end = code.newLabel();
@@ -158,7 +158,7 @@ public class Translator {
                  * if still to be worked on, label in wrong order, need to add goto to jmp
                  * if(false) condition instead of executing it after if(true)
                  */
-                
+
                 match(Tag.IF);
                 match(Tag.LPT);
 
@@ -170,7 +170,6 @@ public class Translator {
                 stat();
                 statp(if_false, if_end);
 
-                
                 // we emit the label in statp() because of the two cases: end or else
                 break;
             }
@@ -191,6 +190,7 @@ public class Translator {
         switch (look.tag) {
             /* GUIDA[<statp> := end] = {end} */
             case Tag.END:
+                code.emit(OpCode.GOto, if_end);
                 match(Tag.END);
                 code.emitLabel(if_false);
                 code.emitLabel(if_end);
@@ -198,14 +198,14 @@ public class Translator {
 
             /*
              * iload x
-             iload y
-             if_icmp l0
-            goto l1(caso falso)
-            l0
-            caso vero
-            l1
-            corpo else
-
+             * iload y
+             * if_icmp l0
+             * goto l1(caso falso)
+             * l0
+             * caso vero
+             * l1
+             * corpo else
+             * 
              */
 
             /* GUIDA[<statp> := else<stat>end] = {else} */
@@ -288,7 +288,7 @@ public class Translator {
              * GUIDA[<idlistp> := ε] = FOLLOW[<idlistp>]
              * FOLLOW[<idlistp>] = {EOF} U {;} U {}} U {end} U {else} U {)}
              */
-            case Tag.EOF, Tag.SEM, Tag.LPG, Tag.END, Tag.ELSE, Tag.RPT:
+            case Tag.EOF, Tag.SEM, Tag.RPG, Tag.END, Tag.ELSE, Tag.RPT:
                 break;
 
             default:
@@ -308,21 +308,23 @@ public class Translator {
                 expr();
 
                 switch (relop) {
-                    case "||": // still needs to be wroked on
-                        code.emit(OpCode.ior); /*
-                                                * then we verify if it's true and send it to label_true when
-                                                * it's not true anymore we jump at label_false or
-                                                * skip this instruction directly
-                                                */
-                        break;
-
-                    case "&&": // still needs to be worked on
-                        code.emit(OpCode.iand);
-                        break;
-
-                    case "!":
-                        // still needs to be worked on
-                        break;
+                    /*
+                     * case "||": // still needs to be wroked on
+                     * code.emit(OpCode.ior); /*
+                     * then we verify if it's true and send it to label_true when
+                     * it's not true anymore we jump at label_false or
+                     * skip this instruction directly
+                     *
+                     * break;
+                     * 
+                     * case "&&": // still needs to be worked on
+                     * code.emit(OpCode.iand);
+                     * break;
+                     * 
+                     * case "!":
+                     * // still needs to be worked on
+                     * break;
+                     */
 
                     case "<":
                         code.emit(OpCode.if_icmplt, label_true);
@@ -469,8 +471,8 @@ public class Translator {
 
     public static void main(String[] args) {
         Lexer lex = new Lexer();
-        String path = "C:\\Users\\occhi\\Github\\university\\LFT_lab\\File_Prova\\factorial.lft"; // il percorso del
-                                                                                                  // file
+        String path = "C:\\Users\\occhi\\Github\\university\\LFT_lab\\File_Prova\\max_tre_num.lft"; // il percorso del
+                                                                                                    // file
         // da
         // leggere
         try {
