@@ -216,7 +216,7 @@ public class Translator {
                 match(Tag.ELSE);
                 stat(); // S2
                 match(Tag.END);
-                code.emitLabel(if_end)
+                code.emitLabel(if_end);
                 break;
             }
 
