@@ -594,7 +594,7 @@ public class Translator5x2 {
 
     public static void main(String[] args) {
         Lexer2x3 lex = new Lexer2x3();
-        String path = "/home/eduardocchipinti/Github/Progetto-LFT/src/File_Prova/and_or_moodle.lft"; // il percorso del
+        String path = "src/File_Prova/and_or_moodle.lft"; // il percorso del
         // file
         // da
         // leggere

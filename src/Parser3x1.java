@@ -174,7 +174,7 @@ public class Parser3x1 {
 
     public static void main(String[] args) {
         Lexer2x3 lex = new Lexer2x3();
-        String path = "File_Prova/prova.lft"; // il percorso del file da
+        String path = "src/File_Prova/prova.lft"; // il percorso del file da
                                                                                               // leggere
         try {
             BufferedReader br = new BufferedReader(new FileReader(path));

@@ -23,7 +23,7 @@ public class CodeGenerator {
 
     public void toJasmin() throws IOException { // v writes text to char files
         PrintWriter out = new PrintWriter(new FileWriter("Output.j"));
-        // ^ prints a formatted rapresentation of an object to a text-output stream
+        // ^ prints a formatted representation of an object to a text-output stream
         String temp = "";
 
         temp = temp + header;
