@@ -1,7 +1,7 @@
 import java.io.*;
 
 // dobbiamo scrivere le azioni semantiche per ogni produzione
-public class Translator {
+public class Translator5x2 {
     private Lexer lex;
     private BufferedReader pbr;
     private Token look;
@@ -11,7 +11,7 @@ public class Translator {
 
     int count = 0;
 
-    public Translator(Lexer l, BufferedReader br) {
+    public Translator5x2(Lexer l, BufferedReader br) {
         lex = l;
         pbr = br;
         move();
@@ -136,7 +136,8 @@ public class Translator {
 
                 match(Tag.WHILE);
                 match('(');
-                bexpr(while_true, while_false);
+                bexprp(while_true, while_false);
+                // bexpr(while_true, while_false);
                 match(')');
 
                 code.emitLabel(while_true);
@@ -162,7 +163,8 @@ public class Translator {
                 match(Tag.IF);
                 match(Tag.LPT);
 
-                bexpr(if_true, if_false);
+                bexprp(if_true, if_false);
+                // bexpr(if_true, if_false);
                 match(Tag.RPT);
 
                 code.emitLabel(if_true);
@@ -216,7 +218,9 @@ public class Translator {
                 match(Tag.ELSE);
                 stat(); // S2
                 match(Tag.END);
+
                 code.emitLabel(if_end);
+
                 break;
             }
 
@@ -309,21 +313,32 @@ public class Translator {
 
                 switch (relop) {
                     /*
-                     * case "||": // still needs to be wroked on
+                     * case "||":{ // still needs to be wroked on
+                     * int or_true =code.newLabel();
+                     * 
+                     * 
                      * code.emit(OpCode.ior); /*
                      * then we verify if it's true and send it to label_true when
                      * it's not true anymore we jump at label_false or
                      * skip this instruction directly
                      *
-                     * break;
                      * 
-                     * case "&&": // still needs to be worked on
+                     * break;
+                     * }
+                     * 
+                     * case "&&": {
                      * code.emit(OpCode.iand);
                      * break;
+                     * }
                      * 
-                     * case "!":
-                     * // still needs to be worked on
+                     * case "!":{
+                     * /*int temp=label_true;
+                     * label_true = label_false;
+                     * label_false=temp;
+                     *
+                     * code.emit(OpCode.ineg);
                      * break;
+                     * }
                      */
 
                     case "<":
@@ -355,11 +370,120 @@ public class Translator {
                 }
                 break;
             }
+            case Tag.AND, Tag.OR, Tag.NOT:
+                bexprp(label_true, label_false);
+                break;
 
             default:
                 error("Error in bexpr()");
         }
         code.emit(OpCode.GOto, label_false);
+    }
+
+    private void bexprp(int label_true, int label_false) {
+        switch (look.tag) {
+            /* GUIDA[<bexprp> := AND<bexpr><bexpr>] = {AND} */
+            /*
+             * case Tag.AND: {
+             * int and_true = code.newLabel();
+             * int and_false = code.newLabel();
+             * int and_end = code.newLabel();
+             * 
+             * match(Tag.AND);
+             * // code.emit(OpCode.iand);
+             * bexpr(and_true, and_false);
+             * bexpr(and_true, and_false);
+             * 
+             * code.emit(OpCode.GOto, and_end);
+             * 
+             * code.emitLabel(and_true);
+             * code.emit(OpCode.ldc, 0); // 0 == TRUE
+             * 
+             * code.emitLabel(and_false);
+             * code.emit(OpCode.ldc, 1); // 1 == FALSE
+             * 
+             * code.emitLabel(and_end);
+             * 
+             * code.emit(OpCode.if_icmpeq, label_true);
+             * code.emit(OpCode.GOto, label_false);
+             * break;
+             * }
+             */
+
+            case Tag.AND: {
+                int and_true = code.newLabel();
+                // int and_false = code.newLabel();
+                // int and_end = code.newLabel();
+
+                match(Tag.AND);
+                // code.emit(OpCode.iand);
+                bexpr(and_true, label_false);
+                code.emitLabel(and_true);
+                bexpr(label_true, label_false);
+                // code.emitLabel(and_false);
+                break;
+            }
+
+            /* GUIDA[<bexprp> := OR<bexpr><bexpr>] = {OR} */
+            /*
+             * case Tag.OR: {
+             * int or_true = code.newLabel();
+             * int or_false = code.newLabel();
+             * int or_end = code.newLabel();
+             * 
+             * match(Tag.OR);
+             * // code.emit(OpCode.iand);
+             * bexpr(or_true, or_false);
+             * bexpr(or_true, or_false);
+             * 
+             * code.emit(OpCode.GOto, or_end);
+             * 
+             * code.emitLabel(or_false);
+             * code.emit(OpCode.ldc, 0); // 0 == TRUE
+             * 
+             * code.emitLabel(or_true);
+             * code.emit(OpCode.ldc, 1); // 1 == FALSE
+             * 
+             * code.emitLabel(or_end);
+             * 
+             * code.emit(OpCode.if_icmpeq, label_true);
+             * code.emit(OpCode.GOto, label_false);
+             * break;
+             * }
+             */
+
+            case Tag.OR: {
+                int or_false = code.newLabel();
+                // int or_false = code.newLabel();
+                // int and_end = code.newLabel();
+
+                match(Tag.OR);
+                // code.emit(OpCode.iand);
+                bexpr(label_true, or_false);
+                code.emitLabel(or_false);
+                bexpr(label_true, label_false);
+                // code.emitLabel(and_false);
+                break;
+            }
+
+            /* GUIDA[<bexprp> := NOT<bexpr><bexpr>] = {NOT} */
+            case Tag.NOT:
+                match(Tag.NOT);
+                // code.emit(OpCode.ineg);
+                bexpr(label_false, label_true); // invert the labels so that the bexpr statement is inverted
+                break;
+
+            /* case epsilon */
+            case Tag.RELOP:
+                bexpr(label_true, label_false);
+                break;
+
+            case Tag.RPT:
+                break;
+                
+            default:
+                error("Error in bexprp");
+        }
     }
 
     private void expr() {
@@ -389,7 +513,6 @@ public class Translator {
                 match(Tag.LPT);
                 exprlist(2); // pass 2 to identify mul
                 match(Tag.RPT);
-
                 code.emit(OpCode.imul);
                 break;
 
@@ -471,13 +594,13 @@ public class Translator {
 
     public static void main(String[] args) {
         Lexer lex = new Lexer();
-        String path = "C:\\Users\\occhi\\Github\\university\\LFT_lab\\File_Prova\\max_tre_num.lft"; // il percorso del
-                                                                                                    // file
+        String path = "File_Prova/and_or_moodle.lft"; // il percorso del
+        // file
         // da
         // leggere
         try {
             BufferedReader br = new BufferedReader(new FileReader(path));
-            Translator translator = new Translator(lex, br);
+            Translator5x2 translator = new Translator5x2(lex, br);
             translator.prog();
             System.out.println("Input OK");
             br.close();

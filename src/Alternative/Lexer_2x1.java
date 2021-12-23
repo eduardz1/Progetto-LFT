@@ -312,7 +312,7 @@ public class Lexer_2x1 {
 
     public static void main(String[] args) {
         Lexer_2x1 lex = new Lexer_2x1();
-        String path = "C:\\Users\\occhi\\Github\\university\\LFT_lab\\prova.txt"; // il percorso del file da leggere
+        String path = "../File_Prova/prova.txt"; // il percorso del file da leggere
         try {
             BufferedReader br = new BufferedReader(new FileReader(path));
             Token tok;
