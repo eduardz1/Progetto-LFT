@@ -4,6 +4,10 @@
     <exclude-output />
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/File_Prova" type="java-resource" />
+      <excludeFolder url="file://$MODULE_DIR$/src/Alternative" />
+      <excludeFolder url="file://$MODULE_DIR$/src/Automi" />
+      <excludeFolder url="file://$MODULE_DIR$/src/Classes" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
