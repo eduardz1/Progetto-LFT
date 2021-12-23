@@ -1,0 +1,105 @@
+P   -> SL eof
+
+SL  -> S SLP
+
+SLP -> ; S SLP
+SLP -> epsilon
+
+S   -> assign E to I
+S   -> print ( EL )
+S   -> read ( I )
+S   -> while ( B ) S
+S   -> if ( B ) S SP
+S   -> { SL }
+
+SP  -> end
+SP  -> else S end
+
+I   -> id IP
+
+IP  -> , id IP
+IP  -> epsilon
+
+B   -> relop E E
+
+E   -> + ( EL )
+E   -> - E E
+E   -> * ( EL )
+E   -> / E E
+E   -> num
+E   -> id
+
+EL  -> E ELP
+
+ELP -> , E ELP
+ELP -> epsilon
+
+------------------------------------------
+
+EPS = SLP IP ELP
+
+------------------------------------------
+
+FIRST[P]   = assign print read while if {
+FIRST[SL]  = assign print read while if {
+FIRST[SLP] = ;
+FIRST[S]   = assign print read while if {
+FIRST[SP]  = end else
+FIRST[I]   = id
+FIRST[IP]  = ,
+FIRST[B]   = relop
+FIRST[E]   = + - * / num id
+FIRST[EL]  = + - * / num id
+FIRST[ELP] = ,
+
+------------------------------------------
+
+FOLLOW[P]   = 
+FOLLOW[SL]  = eof } 
+FOLLOW[SLP] = eof }
+FOLLOW[S]   = eof ; } end else
+FOLLOW[SP]  = eof ; } end else
+FOLLOW[I]   = eof ; } end else )
+FOLLOW[IP]  = eof ; } end else )
+FOLLOW[B]   = )
+FOLLOW[E]   = to ) , + - * / num id
+FOLLOW[EL]  = )
+FOLLOW[ELP] = )
+
+------------------------------------------
+
+GUIDA[P   -> SL eof]        = assign print read while if {
+
+GUIDA[SL  -> S SLP]         = assign print read while if {
+
+GUIDA[SLP -> ; S SLP]       = ;
+GUIDA[SLP -> epsilon]       = eof }
+
+GUIDA[S   -> assign E to I] = assign
+GUIDA[S   -> print ( EL )]  = print
+GUIDA[S   -> read ( I )]    = read
+GUIDA[S   -> while ( B )]   = while
+GUIDA[S   -> if ( B ) S SP] = if
+GUIDA[S   -> { SL }]        = {
+
+GUIDA[SP  -> end]           = end
+GUIDA[SP  -> else S end]    = else
+
+GUIDA[I   -> id IP]          = id
+
+GUIDA[IP  -> , id IP]       = ,
+GUIDA[IP  -> epsilon]       = eof ; } end else )
+
+GUIDA[B   -> relop E E]     = relop
+
+GUIDA[E   -> + ( EL )]      = +
+GUIDA[E   -> - E E]         = -
+GUIDA[E   -> * ( EL )]      = *
+GUIDA[E   -> / E E]         = /
+GUIDA[E   -> num]           = num
+GUIDA[E   -> id]            = id
+
+GUIDA[EL  -> E ELP]         = + - * / num id
+
+GUIDA[ELP -> , E ELP]       = ,
+GUIDA[ELP -> epsilon]       = )

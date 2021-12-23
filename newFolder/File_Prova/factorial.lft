@@ -1,0 +1,8 @@
+read(n);
+assign 2 to i;
+assign 1 to f;
+while (<= i n){
+	assign *(f,i) to f;
+	assign +(i,1) to i
+};
+print(f)
