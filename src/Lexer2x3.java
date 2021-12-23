@@ -1,7 +1,7 @@
 import java.io.*;
 // import java.util.*; <-- never utilized
 // this is a random comment
-public class Lexer {
+public class Lexer2x3 {
 
     private final String identifier_RE = "[a-zA-Z[_[_]*[a-zA-Z0-9]]][a-zA-Z0-9_]*"; // espressione regolare per gli identificatori
     public int line = 1;
@@ -220,7 +220,7 @@ public class Lexer {
     }
 
     public static void main(String[] args) {
-        Lexer lex = new Lexer();
+        Lexer2x3 lex = new Lexer2x3();
         String path = "File_Prova/prova.lft"; // il percorso del file da leggere
         try {
             BufferedReader br = new BufferedReader(new FileReader(path));

@@ -2,7 +2,7 @@ import java.io.*;
 
 // dobbiamo scrivere le azioni semantiche per ogni produzione
 public class Translator5x2 {
-    private Lexer lex;
+    private Lexer2x3 lex;
     private BufferedReader pbr;
     private Token look;
 
@@ -11,7 +11,7 @@ public class Translator5x2 {
 
     int count = 0;
 
-    public Translator5x2(Lexer l, BufferedReader br) {
+    public Translator5x2(Lexer2x3 l, BufferedReader br) {
         lex = l;
         pbr = br;
         move();
@@ -593,8 +593,8 @@ public class Translator5x2 {
     }
 
     public static void main(String[] args) {
-        Lexer lex = new Lexer();
-        String path = "File_Prova/and_or_moodle.lft"; // il percorso del
+        Lexer2x3 lex = new Lexer2x3();
+        String path = "/home/eduardocchipinti/Github/Progetto-LFT/src/File_Prova/and_or_moodle.lft"; // il percorso del
         // file
         // da
         // leggere

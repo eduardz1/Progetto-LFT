@@ -1,11 +1,11 @@
 import java.io.*;
 
 public class Valutatore {
-    private Lexer lex;
+    private Lexer2x3 lex;
     private BufferedReader pbr;
     private Token look;
 
-    public Valutatore(Lexer l, BufferedReader br) {
+    public Valutatore(Lexer2x3 l, BufferedReader br) {
         lex = l;
         pbr = br;
         move();
@@ -221,7 +221,7 @@ public class Valutatore {
     }
 
     public static void main(String[] args) {
-        Lexer lex = new Lexer();
+        Lexer2x3 lex = new Lexer2x3();
         String path = "File_Prova/prova.lft"; // il percorso del file da
                                                                                               // leggere
         try {

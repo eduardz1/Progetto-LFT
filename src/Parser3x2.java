@@ -1,11 +1,11 @@
 import java.io.*;
 
 public class Parser3x2 {
-    private Lexer lex;
+    private Lexer2x3 lex;
     private BufferedReader pbr;
     private Token look;
 
-    public Parser3x2(Lexer l, BufferedReader br) {
+    public Parser3x2(Lexer2x3 l, BufferedReader br) {
         lex = l;
         pbr = br;
         move();
@@ -390,7 +390,7 @@ public class Parser3x2 {
     }
 
     public static void main(String[] args) {
-        Lexer lex = new Lexer();
+        Lexer2x3 lex = new Lexer2x3();
         String path = "File_Prova/max_tre_num.lft"; // il percorso del
         // file
         // da

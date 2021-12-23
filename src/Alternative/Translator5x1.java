@@ -1,8 +1,8 @@
 import java.io.*;
 
 // dobbiamo scrivere le azioni semantiche per ogni produzione
-public class Translator {
-    private Lexer lex;
+public class Translator5x1 {
+    private Lexer2x3 lex;
     private BufferedReader pbr;
     private Token look;
 
@@ -11,7 +11,7 @@ public class Translator {
 
     int count = 0;
 
-    public Translator(Lexer l, BufferedReader br) {
+    public Translator5x1(Lexer2x3 l, BufferedReader br) {
         lex = l;
         pbr = br;
         move();
@@ -470,14 +470,14 @@ public class Translator {
     }
 
     public static void main(String[] args) {
-        Lexer lex = new Lexer();
+        Lexer2x3 lex = new Lexer2x3();
         String path = "../File_Prova/max_tre_num.lft"; // il percorso del
                                                                                                     // file
         // da
         // leggere
         try {
             BufferedReader br = new BufferedReader(new FileReader(path));
-            Translator translator = new Translator(lex, br);
+            Translator5x1 translator = new Translator5x1(lex, br);
             translator.prog();
             System.out.println("Input OK");
             br.close();

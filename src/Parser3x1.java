@@ -1,11 +1,11 @@
 import java.io.*;
 
 public class Parser3x1 {
-    private Lexer lex;
+    private Lexer2x3 lex;
     private BufferedReader pbr;
     private Token look;
 
-    public Parser3x1(Lexer l, BufferedReader br) {
+    public Parser3x1(Lexer2x3 l, BufferedReader br) {
         lex = l;
         pbr = br;
         move();
@@ -173,7 +173,7 @@ public class Parser3x1 {
     }
 
     public static void main(String[] args) {
-        Lexer lex = new Lexer();
+        Lexer2x3 lex = new Lexer2x3();
         String path = "File_Prova/prova.lft"; // il percorso del file da
                                                                                               // leggere
         try {
