@@ -37,6 +37,8 @@ public class Translator5x2 {
     /*
      * GUIDA[<prog> := <statlist>EOF] = FIRST[<stat>]
      * FIRST[<stat>] = {assign} U {print} U {read} U {while} U {if} U {{}
+     *
+     * P -> {S.next=newlabel()} SL {emitlabel(S.next)} eof
      */
     public void prog() {
         int lnext_prog = code.newLabel();
@@ -61,6 +63,8 @@ public class Translator5x2 {
     /*
      * GUIDA[<statlist> := <stat><statlistp>] = FIRST[<stat>]
      * FIRST[<stat>] = {assign} U {print} U {read} U {while} U {if} U {{}
+     *
+     * SL -> S SLP {SL.code = S.code || SLP.code}
      */
     public void statlist(int lnext_prog) {
         switch (look.tag) {
@@ -76,14 +80,22 @@ public class Translator5x2 {
 
     public void statlistp() {
         switch (look.tag) {
-            /* GUIDA[<statlistp> := ;<stat><statlistp>] = FIRST[<statlistp>] = {;} */
+            /*
+             * GUIDA[<statlistp> := ;<stat><statlistp>] = FIRST[<statlistp>] = {;}
+             *
+             * SLP -> ; S SLP {SLP.code = S.code || I(0).code}
+             */
             case Tag.SEM:
                 match(Tag.SEM);
                 stat();
                 statlistp();
                 break;
 
-            /* GUIDA[<statlistp>] := ε] = {EOF==-1} U {}} */
+            /*
+             * GUIDA[<statlistp>] := ε] = {EOF==-1} U {}}
+             *
+             * SLP -> ε {SLP.code = []}
+             */
             case Tag.EOF, Tag.RPG:
                 break;
 
@@ -95,7 +107,11 @@ public class Translator5x2 {
 
     public void stat() {
         switch (look.tag) {
-            /* GUIDA[<stat> := assign<expr>to<idlist>] = {assign} */
+            /*
+             * GUIDA[<stat> := assign<expr>to<idlist>] = {assign}
+             *
+             * S -> assign E to I {S.code = E.code || I(0).code}
+             */
             case Tag.ASSIGN:
                 match(Tag.ASSIGN);
                 expr();
@@ -103,7 +119,11 @@ public class Translator5x2 {
                 idlist(0); // pass 0 to identify the "assign" case
                 break;
 
-            /* GUIDA[<stat> := print(<expr>)] = {print} */
+            /*
+             * GUIDA[<stat> := print(<expr>)] = {print}
+             *
+             * S -> print ( EL ) {S.code = EL(1).code}
+             */
             case Tag.PRINT:
                 match(Tag.PRINT);
                 match(Tag.LPT);
@@ -114,7 +134,11 @@ public class Translator5x2 {
                 match(Tag.RPT);
                 break;
 
-            /* GUIDA[<stat> := read(<expr>)] = {read} */
+            /*
+             * GUIDA[<stat> := read(<expr>)] = {read}
+             *
+             * S -> read ( I ) {S.code = I(1).code}
+             */
             case Tag.READ:
                 match(Tag.READ);
                 match('(');
@@ -122,7 +146,21 @@ public class Translator5x2 {
                 match(')');
                 break;
 
-            /* GUIDA[<stat> := while(<bexpr>)] = {while} */
+            /*
+             * GUIDA[<stat> := while(<bexpr>)] = {while}
+             *
+             * S -> while ( B ) S {
+             *                     S.true  = newlabel()
+             *                     S.false = newlabel()
+             *                     S.start = newlabel()
+             *                     S.code = emitlabel(S.start)  ||
+             *                              BP(S.true, S.false) ||
+             *                              emitlabel(S.true)   ||
+             *                              S.code              ||
+             *                              emit(GOTO, S.start) ||
+             *                              emitlabel(S.false)
+             *                     }
+             */
             case Tag.WHILE: {
                 int while_true = code.newLabel();
                 int while_false = code.newLabel();
@@ -149,7 +187,19 @@ public class Translator5x2 {
                 break;
             }
 
-            /* GUIDA[<stat> := if(<bexpr>)<stat><statp>] = {if} */
+            /*
+             * GUIDA[<stat> := if(<bexpr>)<stat><statp>] = {if}
+             *
+             * S -> if ( B ) S SP {
+             *                     S.true  = newlabel()
+             *                     S.false = newlabel()
+             *                     S.end   = newlabel()
+             *                     S.code = BP(S.true, S.false) ||
+             *                              emitlabel(S.true)   ||
+             *                              S.code              ||
+             *                              SP(S.false, S.end).code
+             *                     }
+             */
             case Tag.IF: {
                 int if_true = code.newLabel();
                 int if_false = code.newLabel();
@@ -176,7 +226,11 @@ public class Translator5x2 {
                 break;
             }
 
-            /* GUIDA[<stat> := {<statlist>}] = {{} */
+            /*
+             * GUIDA[<stat> := {<statlist>}] = {{}
+             *
+             * {S.code = SL(0).code}
+             */
             case '{':
                 match(Tag.LPG);
                 statlist(0); // not sure about that one
@@ -190,7 +244,15 @@ public class Translator5x2 {
 
     public void statp(int if_false, int if_end) {
         switch (look.tag) {
-            /* GUIDA[<statp> := end] = {end} */
+            /*
+             * GUIDA[<statp> := end] = {end}
+             *
+             * SP  -> end {
+             *             SP.code = emit(GOTO, SP.end)  ||
+             *                       emitlabel(SP.false) ||
+             *                       emitlabel(SP.end)
+             *             }
+             */
             case Tag.END:
                 code.emit(OpCode.GOto, if_end);
                 match(Tag.END);
@@ -199,18 +261,15 @@ public class Translator5x2 {
                 break;
 
             /*
-             * iload x
-             * iload y
-             * if_icmp l0
-             * goto l1(caso falso)
-             * l0
-             * caso vero
-             * l1
-             * corpo else
-             * 
+             * GUIDA[<statp> := else<stat>end] = {else}
+             *
+             * SP  -> else S end {
+             *                    SP.code = emit(GOTO, SP.end)  ||
+             *                              emitlabel(SP.false) ||
+             *                              S.code              ||
+             *                              emitlabel(SP.end)
+             *                    }
              */
-
-            /* GUIDA[<statp> := else<stat>end] = {else} */
             case Tag.ELSE: {
                 code.emit(OpCode.GOto, if_end);
                 code.emitLabel(if_false);
@@ -312,61 +371,13 @@ public class Translator5x2 {
                 expr();
 
                 switch (relop) {
-                    /*
-                     * case "||":{ // still needs to be wroked on
-                     * int or_true =code.newLabel();
-                     * 
-                     * 
-                     * code.emit(OpCode.ior); /*
-                     * then we verify if it's true and send it to label_true when
-                     * it's not true anymore we jump at label_false or
-                     * skip this instruction directly
-                     *
-                     * 
-                     * break;
-                     * }
-                     * 
-                     * case "&&": {
-                     * code.emit(OpCode.iand);
-                     * break;
-                     * }
-                     * 
-                     * case "!":{
-                     * /*int temp=label_true;
-                     * label_true = label_false;
-                     * label_false=temp;
-                     *
-                     * code.emit(OpCode.ineg);
-                     * break;
-                     * }
-                     */
-
-                    case "<":
-                        code.emit(OpCode.if_icmplt, label_true);
-                        break;
-
-                    case ">":
-                        code.emit(OpCode.if_icmpgt, label_true);
-                        break;
-
-                    case "==":
-                        code.emit(OpCode.if_icmpeq, label_true);
-                        break;
-
-                    case "<=":
-                        code.emit(OpCode.if_icmple, label_true);
-                        break;
-
-                    case "<>":
-                        code.emit(OpCode.if_icmpne, label_true);
-                        break;
-
-                    case ">=":
-                        code.emit(OpCode.if_icmpge, label_true);
-                        break;
-
-                    default:
-                        error("Error in Word.java RELOP definition");
+                    case "<" -> code.emit(OpCode.if_icmplt, label_true);
+                    case ">" -> code.emit(OpCode.if_icmpgt, label_true);
+                    case "==" -> code.emit(OpCode.if_icmpeq, label_true);
+                    case "<=" -> code.emit(OpCode.if_icmple, label_true);
+                    case "<>" -> code.emit(OpCode.if_icmpne, label_true);
+                    case ">=" -> code.emit(OpCode.if_icmpge, label_true);
+                    default -> error("Error in Word.java RELOP definition");
                 }
                 break;
             }
@@ -382,94 +393,33 @@ public class Translator5x2 {
 
     private void bexprp(int label_true, int label_false) {
         switch (look.tag) {
-            /* GUIDA[<bexprp> := AND<bexpr><bexpr>] = {AND} */
-            /*
-             * case Tag.AND: {
-             * int and_true = code.newLabel();
-             * int and_false = code.newLabel();
-             * int and_end = code.newLabel();
-             * 
-             * match(Tag.AND);
-             * // code.emit(OpCode.iand);
-             * bexpr(and_true, and_false);
-             * bexpr(and_true, and_false);
-             * 
-             * code.emit(OpCode.GOto, and_end);
-             * 
-             * code.emitLabel(and_true);
-             * code.emit(OpCode.ldc, 0); // 0 == TRUE
-             * 
-             * code.emitLabel(and_false);
-             * code.emit(OpCode.ldc, 1); // 1 == FALSE
-             * 
-             * code.emitLabel(and_end);
-             * 
-             * code.emit(OpCode.if_icmpeq, label_true);
-             * code.emit(OpCode.GOto, label_false);
-             * break;
-             * }
-             */
-
             case Tag.AND: {
                 int and_true = code.newLabel();
-                // int and_false = code.newLabel();
-                // int and_end = code.newLabel();
 
                 match(Tag.AND);
-                // code.emit(OpCode.iand);
+
                 bexpr(and_true, label_false);
                 code.emitLabel(and_true);
                 bexpr(label_true, label_false);
-                // code.emitLabel(and_false);
                 break;
             }
 
-            /* GUIDA[<bexprp> := OR<bexpr><bexpr>] = {OR} */
-            /*
-             * case Tag.OR: {
-             * int or_true = code.newLabel();
-             * int or_false = code.newLabel();
-             * int or_end = code.newLabel();
-             * 
-             * match(Tag.OR);
-             * // code.emit(OpCode.iand);
-             * bexpr(or_true, or_false);
-             * bexpr(or_true, or_false);
-             * 
-             * code.emit(OpCode.GOto, or_end);
-             * 
-             * code.emitLabel(or_false);
-             * code.emit(OpCode.ldc, 0); // 0 == TRUE
-             * 
-             * code.emitLabel(or_true);
-             * code.emit(OpCode.ldc, 1); // 1 == FALSE
-             * 
-             * code.emitLabel(or_end);
-             * 
-             * code.emit(OpCode.if_icmpeq, label_true);
-             * code.emit(OpCode.GOto, label_false);
-             * break;
-             * }
-             */
-
             case Tag.OR: {
                 int or_false = code.newLabel();
-                // int or_false = code.newLabel();
-                // int and_end = code.newLabel();
 
                 match(Tag.OR);
-                // code.emit(OpCode.iand);
+
                 bexpr(label_true, or_false);
                 code.emitLabel(or_false);
                 bexpr(label_true, label_false);
-                // code.emitLabel(and_false);
+
                 break;
             }
 
             /* GUIDA[<bexprp> := NOT<bexpr><bexpr>] = {NOT} */
             case Tag.NOT:
                 match(Tag.NOT);
-                // code.emit(OpCode.ineg);
+
                 bexpr(label_false, label_true); // invert the labels so that the bexpr statement is inverted
                 break;
 

@@ -1,26 +1,62 @@
-P   -> {statlist.next=newlabel()} SL {emitlabel(statlist.next)} eof  
+P   -> {S.next=newlabel()} SL {emitlabel(S.next)} eof
 
-SL  -> S SLP {S.next=newlabel() SLP.next=SLP.next SLP.code=S.code}{S.next:SLP.code}
+SL  -> S SLP {SL.code = S.code || SLP.code}
 
-SLP -> ; S SLP
-SLP -> epsilon
+SLP -> ; S SLP {SLP.code = S.code || SLP.code}
+SLP -> epsilon {SLP.code = []}
 
-S   -> assign E to I
-S   -> print ( EL )
-S   -> read ( I )
-S   -> while ( B ) S {B.true=newlabel() B.false=S.next S1.next=newlabel() S.code=S1.next:B.code || B.true:S1.code}
-S   -> if ( B ) S SP
-S   -> { SL } {SL.next=S.next S.code=SL.code}
+S   -> assign E to I {S.code = E.code || I(0).code}
+S   -> print ( EL ) {S.code = EL(1).code}
+S   -> read ( I ) {S.code = I(1).code}
+S   -> while ( B ) S {
+                      S.true  = newlabel()
+                      S.false = newlabel()
+                      S.start = newlabel()
+                      S.code = emitlabel(S.start)  ||
+                               BP(S.true, S.false) ||
+                               emitlabel(S.true)   ||
+                               S.code              ||
+                               emit(GOTO, S.start) ||
+                               emitlabel(S.false)
+                      }
+S   -> if ( B ) S SP {
+                      S.true  = newlabel()
+                      S.false = newlabel()
+                      S.end   = newlabel()
+                      S.code = BP(S.true, S.false) ||
+                               emitlabel(S.true)   ||
+                               S.code              ||
+                               SP(S.false, S.end).code
+                      }
+S   -> { SL } {S.code = SL(0).code}
 
-SP  -> end
-SP  -> else S end
+SP  -> end {
+            SP.code = emit(GOTO, SP.end)  ||
+                      emitlabel(SP.false) ||
+                      emitlabel(SP.end)
+            }
+SP  -> else S end {
+                   SP.code = emit(GOTO, SP.end)  ||
+                             emitlabel(SP.false) ||
+                             S.code              ||
+                             emitlabel(SP.end)
+                   }
 
-I   -> id IP
+I   -> id IP {
+              int ID ||
+              I.code = ....
 
-IP  -> , id IP
-IP  -> epsilon {IP.code=goto IP.next}
+IP  -> , id IP .....
+IP  -> epsilon {IP.code=goto IP.next}.....
 
-B   -> relop E1 E2 {B.code=E1.code || E2.code || if_icmp(relop) B.true || goto B.false}
+B   -> relop E1 E2 {B.code=E1.code || E2.code || if_icmp(relop) B.true || goto B.false}.....
+B   -> BP
+
+BP  -> and B B
+BP  -> or B B
+BP  -> not B
+BP  -> B
+BP  -> epsilon
 
 E   -> + ( EL )
 E   -> - E E {emit(isub)}
