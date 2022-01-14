@@ -52,11 +52,12 @@ IP  -> epsilon {IP.code=goto IP.next}.....
 B   -> relop E1 E2 {B.code=E1.code || E2.code || if_icmp(relop) B.true || goto B.false}.....
 B   -> BP
 
-BP  -> and B B
-BP  -> or B B
-BP  -> not B
-BP  -> B
-BP  -> epsilon
+BP  -> and BS BS
+BP  -> or BS BS
+BP  -> not BS
+BP  -> BS
+
+BS  -> B
 
 E   -> + ( EL )
 E   -> - E E {emit(isub)}

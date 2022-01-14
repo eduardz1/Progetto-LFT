@@ -1,7 +1,7 @@
 import java.io.*;
 
 // dobbiamo scrivere le azioni semantiche per ogni produzione
-public class Translator5x2 {
+public class Translator5x3 {
     private Lexer2x3 lex;
     private BufferedReader pbr;
     private Token look;
@@ -11,7 +11,7 @@ public class Translator5x2 {
 
     int count = 0;
 
-    public Translator5x2(Lexer2x3 l, BufferedReader br) {
+    public Translator5x3(Lexer2x3 l, BufferedReader br) {
         lex = l;
         pbr = br;
         move();
@@ -150,16 +150,16 @@ public class Translator5x2 {
              * GUIDA[<stat> := while(<bexpr>)] = {while}
              *
              * S -> while ( B ) S {
-             *                     S.true  = newlabel()
-             *                     S.false = newlabel()
-             *                     S.start = newlabel()
-             *                     S.code = emitlabel(S.start)  ||
-             *                              BP(S.true, S.false) ||
-             *                              emitlabel(S.true)   ||
-             *                              S.code              ||
-             *                              emit(GOTO, S.start) ||
-             *                              emitlabel(S.false)
-             *                     }
+             * S.true = newlabel()
+             * S.false = newlabel()
+             * S.start = newlabel()
+             * S.code = emitlabel(S.start) ||
+             * BP(S.true, S.false) ||
+             * emitlabel(S.true) ||
+             * S.code ||
+             * emit(GOTO, S.start) ||
+             * emitlabel(S.false)
+             * }
              */
             case Tag.WHILE: {
                 int while_true = code.newLabel();
@@ -175,6 +175,7 @@ public class Translator5x2 {
                 match(Tag.WHILE);
                 match('(');
                 bexprp(while_true, while_false);
+                code.emit(OpCode.GOto, while_false);
                 // bexpr(while_true, while_false);
                 match(')');
 
@@ -191,14 +192,14 @@ public class Translator5x2 {
              * GUIDA[<stat> := if(<bexpr>)<stat><statp>] = {if}
              *
              * S -> if ( B ) S SP {
-             *                     S.true  = newlabel()
-             *                     S.false = newlabel()
-             *                     S.end   = newlabel()
-             *                     S.code = BP(S.true, S.false) ||
-             *                              emitlabel(S.true)   ||
-             *                              S.code              ||
-             *                              SP(S.false, S.end).code
-             *                     }
+             * S.true = newlabel()
+             * S.false = newlabel()
+             * S.end = newlabel()
+             * S.code = BP(S.true, S.false) ||
+             * emitlabel(S.true) ||
+             * S.code ||
+             * SP(S.false, S.end).code
+             * }
              */
             case Tag.IF: {
                 int if_true = code.newLabel();
@@ -214,6 +215,7 @@ public class Translator5x2 {
                 match(Tag.LPT);
 
                 bexprp(if_true, if_false);
+                code.emit(OpCode.GOto, if_false);
                 // bexpr(if_true, if_false);
                 match(Tag.RPT);
 
@@ -247,11 +249,11 @@ public class Translator5x2 {
             /*
              * GUIDA[<statp> := end] = {end}
              *
-             * SP  -> end {
-             *             SP.code = emit(GOTO, SP.end)  ||
-             *                       emitlabel(SP.false) ||
-             *                       emitlabel(SP.end)
-             *             }
+             * SP -> end {
+             * SP.code = emit(GOTO, SP.end) ||
+             * emitlabel(SP.false) ||
+             * emitlabel(SP.end)
+             * }
              */
             case Tag.END:
                 code.emit(OpCode.GOto, if_end);
@@ -263,12 +265,12 @@ public class Translator5x2 {
             /*
              * GUIDA[<statp> := else<stat>end] = {else}
              *
-             * SP  -> else S end {
-             *                    SP.code = emit(GOTO, SP.end)  ||
-             *                              emitlabel(SP.false) ||
-             *                              S.code              ||
-             *                              emitlabel(SP.end)
-             *                    }
+             * SP -> else S end {
+             * SP.code = emit(GOTO, SP.end) ||
+             * emitlabel(SP.false) ||
+             * S.code ||
+             * emitlabel(SP.end)
+             * }
              */
             case Tag.ELSE: {
                 code.emit(OpCode.GOto, if_end);
@@ -381,6 +383,7 @@ public class Translator5x2 {
                 }
                 break;
             }
+
             case Tag.AND, Tag.OR, Tag.NOT:
                 bexprp(label_true, label_false);
                 break;
@@ -388,7 +391,7 @@ public class Translator5x2 {
             default:
                 error("Error in bexpr()");
         }
-        code.emit(OpCode.GOto, label_false);
+        // code.emit(OpCode.GOto, label_false);
     }
 
     private void bexprp(int label_true, int label_false) {
@@ -399,8 +402,10 @@ public class Translator5x2 {
                 match(Tag.AND);
 
                 bexpr(and_true, label_false);
+                code.emit(OpCode.GOto, label_false);
                 code.emitLabel(and_true);
                 bexpr(label_true, label_false);
+                code.emit(OpCode.GOto, label_false);
                 break;
             }
 
@@ -409,9 +414,10 @@ public class Translator5x2 {
 
                 match(Tag.OR);
 
-                bexpr(label_true, or_false);
+                bexprs(label_true, or_false);
+
                 code.emitLabel(or_false);
-                bexpr(label_true, label_false);
+                bexprs(label_true, label_false);
 
                 break;
             }
@@ -420,20 +426,56 @@ public class Translator5x2 {
             case Tag.NOT:
                 match(Tag.NOT);
 
-                bexpr(label_false, label_true); // invert the labels so that the bexpr statement is inverted
+                bexprs(label_false, label_true); // invert the labels so that the bexpr statement is inverted
+
                 break;
 
             /* case epsilon */
             case Tag.RELOP:
-                bexpr(label_true, label_false);
+                bexprs(label_true, label_false);
+
                 break;
 
             case Tag.RPT:
+
                 break;
-                
+
             default:
                 error("Error in bexprp");
         }
+    }
+
+    private void bexprs(int label_true, int label_false) {
+        switch (look.tag) {
+            /* GUIDA[<bexpr> := RELOP<expr><expr>] = {RELOP} */
+            case Tag.RELOP: {
+                String relop = ((Word) look).lexeme; // save relop value in a local variable because we need to match
+                                                     // before the switch case
+                match(Tag.RELOP);
+                expr(); // we need to write expr1 and expr2 first
+                expr();
+
+                switch (relop) {
+                    case "<" -> code.emit(OpCode.if_icmplt, label_true);
+                    case ">" -> code.emit(OpCode.if_icmpgt, label_true);
+                    case "==" -> code.emit(OpCode.if_icmpeq, label_true);
+                    case "<=" -> code.emit(OpCode.if_icmple, label_true);
+                    case "<>" -> code.emit(OpCode.if_icmpne, label_true);
+                    case ">=" -> code.emit(OpCode.if_icmpge, label_true);
+                    default -> error("Error in Word.java RELOP definition");
+                }
+                break;
+            }
+
+            case Tag.AND, Tag.OR, Tag.NOT:
+                bexprp(label_true, label_false);
+                break;
+
+            default:
+                error("Error in bexprs()");
+        }
+
+        code.emit(OpCode.GOto, label_false);
     }
 
     private void expr() {
@@ -550,7 +592,7 @@ public class Translator5x2 {
         // leggere
         try {
             BufferedReader br = new BufferedReader(new FileReader(path));
-            Translator5x2 translator = new Translator5x2(lex, br);
+            Translator5x3 translator = new Translator5x3(lex, br);
             translator.prog();
             System.out.println("Input OK");
             br.close();
