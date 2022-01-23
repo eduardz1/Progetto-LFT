@@ -1,3 +1,5 @@
+package Automi.Automi;
+
 /*
 
 Progettare e implementare un DFA che riconosca il linguaggio degli identificatori

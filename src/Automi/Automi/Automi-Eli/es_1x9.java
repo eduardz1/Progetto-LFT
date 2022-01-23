@@ -1,4 +1,4 @@
-public class Es_1x9 {
+public class es_1x9 {
     public static boolean scan(String s) {
         int state = 0;
         int i = 0;

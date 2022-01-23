@@ -1,3 +1,5 @@
+package Automi.Automi;
+
 public class ex_1x1{
 
     public static boolean scan1(String s) {

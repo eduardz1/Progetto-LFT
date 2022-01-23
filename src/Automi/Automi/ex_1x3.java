@@ -1,3 +1,5 @@
+package Automi.Automi;
+
 public class ex_1x3 {
     public static void main(String[] args) {
         System.out.println(scan3("123456Bianchi") == true);

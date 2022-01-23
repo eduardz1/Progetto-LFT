@@ -24,6 +24,6 @@ public class es_1x7 {
     }
 
     public static boolean scan7(String s) {
-
+        return true;
     }
 }
