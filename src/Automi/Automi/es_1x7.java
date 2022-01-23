@@ -11,7 +11,7 @@ public class es_1x7 {
         System.out.println(scan7("eduard")    == true);
         System.out.println(scan7("EDUARD")    == true);
         System.out.println(scan7("Edward")    == true);
-        System.out.println(scan7("Eduardo")   == true);
+        System.out.println(scan7("Eduardo")   == false);
         System.out.println(scan7("Ed*ard")    == true);
         System.out.println(scan7("Aduard")    == true);
         System.out.println(scan7("Eduarr")    == true);
@@ -24,6 +24,93 @@ public class es_1x7 {
     }
 
     public static boolean scan7(String s) {
-        return true;
+        int state = 0;
+        int i = 0;
+
+        while (state >= 0 && i < s.length()) {
+            final char ch = Character.toUpperCase(s.charAt(i++));
+            final int chAscii = (int) ch;
+
+            switch (state) {
+                case 0:
+                    if (chAscii == 'E')
+                        state = 1;
+                    else
+                        state = 7;
+                    break;
+
+                case 1:
+                    if (chAscii == 'D')
+                        state = 2;
+                    else
+                        state = 8;
+                    break;
+
+                case 2:
+                    if (chAscii == 'U')
+                        state = 3;
+                    else
+                        state = 9;
+                    break;
+
+                case 3:
+                    if (chAscii == 'A')
+                        state = 4;
+                    else
+                        state = 10;
+                    break;
+
+                case 4:
+                    if (chAscii == 'R')
+                        state = 5;
+                    else
+                        state = 11;
+                    break;
+
+                case 5:
+                    state = 6;
+                    break;
+
+                case 6:
+                    state = -1;
+                    break;
+
+                case 7:
+                    if (chAscii == 'D')
+                        state = 8;
+                    else
+                        state = -1;
+                    break;
+
+                case 8:
+                    if (chAscii == 'U')
+                        state = 9;
+                    else
+                        state = -1;
+                    break;
+
+                case 9:
+                    if (chAscii == 'A')
+                        state = 10;
+                    else
+                        state = -1;
+                    break;
+
+                case 10:
+                    if (chAscii == 'R')
+                        state = 11;
+                    else
+                        state = -1;
+                    break;
+
+                case 11:
+                    if (chAscii == 'D')
+                        state = 6;
+                    else
+                        state = -1;
+            }
+        }
+        
+        return state == 6;
     }
 }
