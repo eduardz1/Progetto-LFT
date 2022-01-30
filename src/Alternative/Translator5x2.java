@@ -1,3 +1,5 @@
+package Alternative;
+
 import java.io.*;
 
 // dobbiamo scrivere le azioni semantiche per ogni produzione

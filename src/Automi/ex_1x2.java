@@ -1,4 +1,4 @@
-package Automi.Automi;
+package Automi;
 
 /*
 

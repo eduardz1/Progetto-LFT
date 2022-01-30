@@ -1,4 +1,4 @@
-package Automi.Automi;
+package Automi;
 
 public class ex_1x3 {
     public static void main(String[] args) {

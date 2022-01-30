@@ -1,6 +1,6 @@
-package Automi.Automi;
+package Automi;
 
-public class es_1x10 {
+public class ex_1x10 {
     public static void main(String[] args) {
         System.out.println(scan10("aaa/****/aa") == true);
         System.out.println(scan10("aa/*a*a*/") == true);

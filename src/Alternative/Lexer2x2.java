@@ -1,3 +1,5 @@
+package Alternative;
+
 import java.io.*;
 // import java.util.*; <== not necessary
 

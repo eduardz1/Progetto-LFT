@@ -1,11 +1,11 @@
-package Automi.Automi;
+package Automi;
 
 /*
 DFA che riconosca il linguaggio di stringhe che contengono il mio nome e tutte le stringhe
 ottenute dopo la sostituzione di un carattere del nome con uno qualsiasi  
 */
 
-public class es_1x7 {
+public class ex_1x7 {
     public static void main(String[] args) {
         System.out.println(scan7("Eduard")    == true);
         System.out.println(scan7("eduard")    == true);

@@ -1,4 +1,4 @@
-package Automi.Automi;
+package Automi;
 
 public class ex_1x1{
 

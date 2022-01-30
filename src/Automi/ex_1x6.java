@@ -1,4 +1,4 @@
-package Automi.Automi;
+package Automi;
 
 /*
 DFA che riconosca il linguaggio di stringhe che contengono 
@@ -14,18 +14,18 @@ num matricola composto da almeno due cifre
 public class ex_1x6 {
     
     public static void main(String[] args) {
-        System.out.println(scan8("654321Bianchi") == true);
-        System.out.println(scan8("123456Rossi") == true);
-        System.out.println(scan8("221B") == true);
-        System.out.println(scan8("123456Bianchi") == false);
-        System.out.println(scan8("654321Rossi") == false);
-        System.out.println(scan8("5") == false);
-        System.out.println(scan8("654322") == false);
-        System.out.println(scan8("Rossi") == false);
-        System.out.println(scan8("2Bianchi") == false);
+        System.out.println(scan6("654321Bianchi") == true);
+        System.out.println(scan6("123456Rossi") == true);
+        System.out.println(scan6("221B") == true);
+        System.out.println(scan6("123456Bianchi") == false);
+        System.out.println(scan6("654321Rossi") == false);
+        System.out.println(scan6("5") == false);
+        System.out.println(scan6("654322") == false);
+        System.out.println(scan6("Rossi") == false);
+        System.out.println(scan6("2Bianchi") == false);
     }
 
-    public static boolean scan(String s){
+    public static boolean scan6(String s){
         int state = 0;
         int i = 0;
 

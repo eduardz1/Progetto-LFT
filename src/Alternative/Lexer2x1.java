@@ -1,7 +1,9 @@
+package Alternative;
+
 import java.io.*;
 // import java.util.*; <== not necessary
 
-public class Lexer_2x1 {
+public class Lexer2x1 {
 
     public static int line = 1;
     private char peek = ' ';
