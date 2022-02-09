@@ -391,10 +391,7 @@ public class Parser3x2 {
 
     public static void main(String[] args) {
         Lexer2x3 lex = new Lexer2x3();
-        String path = "src/File_Prova/max_tre_num.lft"; // il percorso del
-        // file
-        // da
-        // leggere
+        String path = "src/File_Prova/max_tre_num.lft"; // il percorso del file da leggere
         try {
             BufferedReader br = new BufferedReader(new FileReader(path));
             Parser3x2 parser = new Parser3x2(lex, br);

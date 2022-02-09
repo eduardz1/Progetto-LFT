@@ -1,9 +1,9 @@
-package Alternative;
+
 
 import java.io.*;
 
 // dobbiamo scrivere le azioni semantiche per ogni produzione
-public class Translator5x1 {
+public class Translator5x2 {
     private Lexer2x3 lex;
     private BufferedReader pbr;
     private Token look;
@@ -13,7 +13,7 @@ public class Translator5x1 {
 
     int count = 0;
 
-    public Translator5x1(Lexer2x3 l, BufferedReader br) {
+    public Translator5x2(Lexer2x3 l, BufferedReader br) {
         lex = l;
         pbr = br;
         move();
@@ -39,6 +39,8 @@ public class Translator5x1 {
     /*
      * GUIDA[<prog> := <statlist>EOF] = FIRST[<stat>]
      * FIRST[<stat>] = {assign} U {print} U {read} U {while} U {if} U {{}
+     *
+     * P -> {S.next=newlabel()} SL {emitlabel(S.next)} eof
      */
     public void prog() {
         int lnext_prog = code.newLabel();
@@ -63,6 +65,8 @@ public class Translator5x1 {
     /*
      * GUIDA[<statlist> := <stat><statlistp>] = FIRST[<stat>]
      * FIRST[<stat>] = {assign} U {print} U {read} U {while} U {if} U {{}
+     *
+     * SL -> S SLP {SL.code = S.code || SLP.code}
      */
     public void statlist(int lnext_prog) {
         switch (look.tag) {
@@ -78,14 +82,22 @@ public class Translator5x1 {
 
     public void statlistp() {
         switch (look.tag) {
-            /* GUIDA[<statlistp> := ;<stat><statlistp>] = FIRST[<statlistp>] = {;} */
+            /*
+             * GUIDA[<statlistp> := ;<stat><statlistp>] = FIRST[<statlistp>] = {;}
+             *
+             * SLP -> ; S SLP {SLP.code = S.code || I(0).code}
+             */
             case Tag.SEM:
                 match(Tag.SEM);
                 stat();
                 statlistp();
                 break;
 
-            /* GUIDA[<statlistp>] := ε] = {EOF==-1} U {}} */
+            /*
+             * GUIDA[<statlistp>] := ε] = {EOF==-1} U {}}
+             *
+             * SLP -> ε {SLP.code = []}
+             */
             case Tag.EOF, Tag.RPG:
                 break;
 
@@ -97,7 +109,11 @@ public class Translator5x1 {
 
     public void stat() {
         switch (look.tag) {
-            /* GUIDA[<stat> := assign<expr>to<idlist>] = {assign} */
+            /*
+             * GUIDA[<stat> := assign<expr>to<idlist>] = {assign}
+             *
+             * S -> assign E to I {S.code = E.code || I(0).code}
+             */
             case Tag.ASSIGN:
                 match(Tag.ASSIGN);
                 expr();
@@ -105,7 +121,11 @@ public class Translator5x1 {
                 idlist(0); // pass 0 to identify the "assign" case
                 break;
 
-            /* GUIDA[<stat> := print(<expr>)] = {print} */
+            /*
+             * GUIDA[<stat> := print(<expr>)] = {print}
+             *
+             * S -> print ( EL ) {S.code = EL(1).code}
+             */
             case Tag.PRINT:
                 match(Tag.PRINT);
                 match(Tag.LPT);
@@ -116,7 +136,11 @@ public class Translator5x1 {
                 match(Tag.RPT);
                 break;
 
-            /* GUIDA[<stat> := read(<expr>)] = {read} */
+            /*
+             * GUIDA[<stat> := read(<expr>)] = {read}
+             *
+             * S -> read ( I ) {S.code = I(1).code}
+             */
             case Tag.READ:
                 match(Tag.READ);
                 match('(');
@@ -124,7 +148,21 @@ public class Translator5x1 {
                 match(')');
                 break;
 
-            /* GUIDA[<stat> := while(<bexpr>)] = {while} */
+            /*
+             * GUIDA[<stat> := while(<bexpr>)] = {while}
+             *
+             * S -> while ( B ) S {
+             *                     S.true  = newlabel()
+             *                     S.false = newlabel()
+             *                     S.start = newlabel()
+             *                     S.code = emitlabel(S.start)  ||
+             *                              BP(S.true, S.false) ||
+             *                              emitlabel(S.true)   ||
+             *                              S.code              ||
+             *                              emit(GOTO, S.start) ||
+             *                              emitlabel(S.false)
+             *                     }
+             */
             case Tag.WHILE: {
                 int while_true = code.newLabel();
                 int while_false = code.newLabel();
@@ -138,7 +176,8 @@ public class Translator5x1 {
 
                 match(Tag.WHILE);
                 match('(');
-                bexpr(while_true, while_false);
+                bexprp(while_true, while_false);
+                // bexpr(while_true, while_false);
                 match(')');
 
                 code.emitLabel(while_true);
@@ -150,7 +189,19 @@ public class Translator5x1 {
                 break;
             }
 
-            /* GUIDA[<stat> := if(<bexpr>)<stat><statp>] = {if} */
+            /*
+             * GUIDA[<stat> := if(<bexpr>)<stat><statp>] = {if}
+             *
+             * S -> if ( B ) S SP {
+             *                     S.true  = newlabel()
+             *                     S.false = newlabel()
+             *                     S.end   = newlabel()
+             *                     S.code = BP(S.true, S.false) ||
+             *                              emitlabel(S.true)   ||
+             *                              S.code              ||
+             *                              SP(S.false, S.end).code
+             *                     }
+             */
             case Tag.IF: {
                 int if_true = code.newLabel();
                 int if_false = code.newLabel();
@@ -164,7 +215,8 @@ public class Translator5x1 {
                 match(Tag.IF);
                 match(Tag.LPT);
 
-                bexpr(if_true, if_false);
+                bexprp(if_true, if_false);
+                // bexpr(if_true, if_false);
                 match(Tag.RPT);
 
                 code.emitLabel(if_true);
@@ -176,7 +228,11 @@ public class Translator5x1 {
                 break;
             }
 
-            /* GUIDA[<stat> := {<statlist>}] = {{} */
+            /*
+             * GUIDA[<stat> := {<statlist>}] = {{}
+             *
+             * {S.code = SL(0).code}
+             */
             case '{':
                 match(Tag.LPG);
                 statlist(0); // not sure about that one
@@ -190,7 +246,15 @@ public class Translator5x1 {
 
     public void statp(int if_false, int if_end) {
         switch (look.tag) {
-            /* GUIDA[<statp> := end] = {end} */
+            /*
+             * GUIDA[<statp> := end] = {end}
+             *
+             * SP  -> end {
+             *             SP.code = emit(GOTO, SP.end)  ||
+             *                       emitlabel(SP.false) ||
+             *                       emitlabel(SP.end)
+             *             }
+             */
             case Tag.END:
                 code.emit(OpCode.GOto, if_end);
                 match(Tag.END);
@@ -199,18 +263,15 @@ public class Translator5x1 {
                 break;
 
             /*
-             * iload x
-             * iload y
-             * if_icmp l0
-             * goto l1(caso falso)
-             * l0
-             * caso vero
-             * l1
-             * corpo else
-             * 
+             * GUIDA[<statp> := else<stat>end] = {else}
+             *
+             * SP  -> else S end {
+             *                    SP.code = emit(GOTO, SP.end)  ||
+             *                              emitlabel(SP.false) ||
+             *                              S.code              ||
+             *                              emitlabel(SP.end)
+             *                    }
              */
-
-            /* GUIDA[<statp> := else<stat>end] = {else} */
             case Tag.ELSE: {
                 code.emit(OpCode.GOto, if_end);
                 code.emitLabel(if_false);
@@ -218,7 +279,9 @@ public class Translator5x1 {
                 match(Tag.ELSE);
                 stat(); // S2
                 match(Tag.END);
+
                 code.emitLabel(if_end);
+
                 break;
             }
 
@@ -310,58 +373,69 @@ public class Translator5x1 {
                 expr();
 
                 switch (relop) {
-                    /*
-                     * case "||": // still needs to be wroked on
-                     * code.emit(OpCode.ior); /*
-                     * then we verify if it's true and send it to label_true when
-                     * it's not true anymore we jump at label_false or
-                     * skip this instruction directly
-                     *
-                     * break;
-                     * 
-                     * case "&&": // still needs to be worked on
-                     * code.emit(OpCode.iand);
-                     * break;
-                     * 
-                     * case "!":
-                     * // still needs to be worked on
-                     * break;
-                     */
-
-                    case "<":
-                        code.emit(OpCode.if_icmplt, label_true);
-                        break;
-
-                    case ">":
-                        code.emit(OpCode.if_icmpgt, label_true);
-                        break;
-
-                    case "==":
-                        code.emit(OpCode.if_icmpeq, label_true);
-                        break;
-
-                    case "<=":
-                        code.emit(OpCode.if_icmple, label_true);
-                        break;
-
-                    case "<>":
-                        code.emit(OpCode.if_icmpne, label_true);
-                        break;
-
-                    case ">=":
-                        code.emit(OpCode.if_icmpge, label_true);
-                        break;
-
-                    default:
-                        error("Error in Word.java RELOP definition");
+                    case "<" -> code.emit(OpCode.if_icmplt, label_true);
+                    case ">" -> code.emit(OpCode.if_icmpgt, label_true);
+                    case "==" -> code.emit(OpCode.if_icmpeq, label_true);
+                    case "<=" -> code.emit(OpCode.if_icmple, label_true);
+                    case "<>" -> code.emit(OpCode.if_icmpne, label_true);
+                    case ">=" -> code.emit(OpCode.if_icmpge, label_true);
+                    default -> error("Error in Word.java RELOP definition");
                 }
                 break;
             }
+            case Tag.AND, Tag.OR, Tag.NOT:
+                bexprp(label_true, label_false);
+                break;
 
             default:
                 error("Error in bexpr()");
         }
         code.emit(OpCode.GOto, label_false);
+    }
+
+    private void bexprp(int label_true, int label_false) {
+        switch (look.tag) {
+            case Tag.AND: {
+                int and_true = code.newLabel();
+
+                match(Tag.AND);
+
+                bexpr(and_true, label_false);
+                code.emitLabel(and_true);
+                bexpr(label_true, label_false);
+                break;
+            }
+
+            case Tag.OR: {
+                int or_false = code.newLabel();
+
+                match(Tag.OR);
+
+                bexpr(label_true, or_false);
+                code.emitLabel(or_false);
+                bexpr(label_true, label_false);
+
+                break;
+            }
+
+            /* GUIDA[<bexprp> := NOT<bexpr><bexpr>] = {NOT} */
+            case Tag.NOT:
+                match(Tag.NOT);
+
+                bexpr(label_false, label_true); // invert the labels so that the bexpr statement is inverted
+                break;
+
+            /* case epsilon */
+            case Tag.RELOP:
+                bexpr(label_true, label_false);
+                break;
+
+            case Tag.RPT:
+                break;
+                
+            default:
+                error("Error in bexprp");
+        }
     }
 
     private void expr() {
@@ -391,7 +465,6 @@ public class Translator5x1 {
                 match(Tag.LPT);
                 exprlist(2); // pass 2 to identify mul
                 match(Tag.RPT);
-
                 code.emit(OpCode.imul);
                 break;
 
@@ -473,13 +546,10 @@ public class Translator5x1 {
 
     public static void main(String[] args) {
         Lexer2x3 lex = new Lexer2x3();
-        String path = "../File_Prova/max_tre_num.lft"; // il percorso del
-                                                                                                    // file
-        // da
-        // leggere
+        String path = "src/File_Prova/and_or_moodle.lft"; // il percorso del file da leggere
         try {
             BufferedReader br = new BufferedReader(new FileReader(path));
-            Translator5x1 translator = new Translator5x1(lex, br);
+            Translator5x2 translator = new Translator5x2(lex, br);
             translator.prog();
             System.out.println("Input OK");
             br.close();

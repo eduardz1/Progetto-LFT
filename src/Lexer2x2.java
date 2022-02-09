@@ -1,9 +1,6 @@
-package Alternative;
-
 import java.io.*;
-// import java.util.*; <== not necessary
 
-public class Lexer_2x2 {
+public class Lexer2x2 {
 
     private final String identifier_RE = "[a-zA-Z[_[_]*[a-zA-Z0-9]]][a-zA-Z0-9_]*"; // espressione regolare per gli identificatori
     public static int line = 1;
@@ -205,11 +202,15 @@ public class Lexer_2x2 {
             } else if (Character.isDigit(peek)) {
 
                 String number = "";
-                while(Character.isDigit(peek)){
-                    number+=peek;
+                while (Character.isDigit(peek)) {
+                    number += peek;
                     readch(br);
                 }
-                return new Word(Tag.NUM, number);
+                
+                if(number.charAt(0) != '0')
+                    return new Word(Tag.NUM, number);
+                else
+                    return new Word(Tag.NUM, "0");
 
             } else {
                 System.err.println("Erroneous character: " + peek);
@@ -219,8 +220,8 @@ public class Lexer_2x2 {
     }
 
     public static void main(String[] args) {
-        Lexer_2x2 lex = new Lexer_2x2();
-        String path = "../File_Prova/prova.txt"; // il percorso del file da leggere
+        Lexer2x2 lex = new Lexer2x2();
+        String path = "src/File_Prova/test_lexer.lft"; // il percorso del file da leggere
         try {
             BufferedReader br = new BufferedReader(new FileReader(path));
             Token tok;

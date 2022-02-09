@@ -1,9 +1,10 @@
 import java.io.*;
+// import java.util.*; <== not necessary
 
-public class Lexer2x3 {
+public class Lexer2x1 {
 
-    private final String identifier_RE = "[a-zA-Z[_[_]*[a-zA-Z0-9]]][a-zA-Z0-9_]*"; // espressione regolare per gli identificatori
-    public int line = 1;
+    private final String identifier_RE = "[a-zA-Z][a-zA-Z0-9]*"; // espressione regolare per gli identificatori
+    public static int line = 1;
     private char peek = ' ';
 
     private void readch(BufferedReader br) {
@@ -54,28 +55,8 @@ public class Lexer2x3 {
             peek = ' ';
             return Token.mult;
 
-        case '/': // implementazione commenti
-            readch(br);
-            if (peek == '/') {
-                while(peek != '\n')
-                    readch(br);
-                peek = ' ';
-                return lexical_scan(br);
-            } else if (peek == '*') {
-                readch(br);
-                while (peek != (char) -1) {
-                    readch(br);
-                    while (peek == '*') {
-                        readch(br);
-                        if (peek == '/') {
-                            peek = ' ';
-                            return lexical_scan(br);
-                        }
-                    }
-                }
-                System.err.println("Erroneous comment");
-                return null;
-            }
+        case '/':
+            peek = ' ';
             return Token.div;
 
         case ';':
@@ -114,8 +95,8 @@ public class Lexer2x3 {
             } else if (peek == '=') {
                 peek = ' ';
                 return Word.le;
-            } else if (peek == ' ' || Character.isLetterOrDigit(peek)) {
-                // NO --> peek = ' '; otherwise we eat an extra char
+            } else if (peek == ' ') {
+                peek = ' ';
                 return Word.lt;
             } else {
                 System.err.println("Erroneous character" + " after < : " + peek);
@@ -127,8 +108,8 @@ public class Lexer2x3 {
             if (peek == '=') {
                 peek = ' ';
                 return Word.ge;
-            } else if (peek == ' ' || Character.isLetterOrDigit(peek)) {
-                // NO --> peek = ' '; otherwise we eat an extra char
+            } else if (peek == ' ') {
+                peek = ' ';
                 return Word.gt;
             } else {
                 System.err.println("Erroneous character" + " after > : " + peek);
@@ -147,9 +128,9 @@ public class Lexer2x3 {
 
         case (char) -1:
             return new Token(Tag.EOF);
-
-        default:
+            default:
             if (Character.isLetter(peek) || peek == '_') { // gestisco identificatori e parole chiave
+                
                 String identifier = "";
                 while(Character.isLetterOrDigit(peek) || peek == '_'){
                     identifier+=peek;
@@ -220,9 +201,10 @@ public class Lexer2x3 {
             }
         }
     }
+    
 
     public static void main(String[] args) {
-        Lexer2x3 lex = new Lexer2x3();
+        Lexer2x1 lex = new Lexer2x1();
         String path = "src/File_Prova/test_lexer.lft"; // il percorso del file da leggere
         try {
             BufferedReader br = new BufferedReader(new FileReader(path));
