@@ -28,8 +28,6 @@ public class Parser3x2 {
             error("syntax error");
     }
 
-    // FINALLY funziona :D, se hai domande chiedi pure, adesso ho finalmente capito
-    // come farli e sono super easy
     public void prog() {
         switch (look.tag) {
             /*
