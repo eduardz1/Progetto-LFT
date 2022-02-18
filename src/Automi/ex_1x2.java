@@ -1,19 +1,15 @@
-package Automi;
+package automi;
 
 /*
-
-Progettare e implementare un DFA che riconosca il linguaggio degli identificatori
-in un linguaggio in stile Java: un identificatore e una sequenza non vuota di lettere, numeri, ed il `
-simbolo di underscore _ che non comincia con un numero e che non puo essere composto solo `
-dal simbolo _. Compilare e testare il suo funzionamento su un insieme significativo di esempi.
-
-*/
+ * Progettare e implementare un DFA che riconosca il linguaggio degli identificatori
+ * in un linguaggio in stile Java: un identificatore e una sequenza non vuota di lettere, numeri, ed il `
+ * simbolo di underscore _ che non comincia con un numero e che non puo essere composto solo `
+ * dal simbolo _. Compilare e testare il suo funzionamento su un insieme significativo di esempi.
+ */
 
 public class ex_1x2 {
 
     public static void main(String[] args){
-
-        // All test passed
         System.out.println(scan2("x")       == true);
         System.out.println(scan2("flag1")   == true);
         System.out.println(scan2("x2y2")    == true);

@@ -1,15 +1,15 @@
-package Automi;
+package automi;
 
 /*
-DFA che riconosca il linguaggio di stringhe che contengono 
-un numero di matricola seguito senza spazi da un cognome 
-dove la combinazione corrisponde agli studenti del turno T2 e T3
-
-T2: cognomi tra A e K con penultima cifra pari
-T3: cognomi tra L e Z epenultima cifra dispari
-
-num matricola composto da almeno due cifre
-*/
+ * DFA che riconosca il linguaggio di stringhe che contengono 
+ * un numero di matricola seguito senza spazi da un cognome 
+ * dove la combinazione corrisponde agli studenti del turno T2 e T3
+ * 
+ * T2: cognomi tra A e K con penultima cifra pari
+ * T3: cognomi tra L e Z epenultima cifra dispari
+ * 
+ * num matricola composto da almeno due cifre
+ */
 
 public class ex_1x6 {
     

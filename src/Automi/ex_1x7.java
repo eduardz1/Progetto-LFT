@@ -1,9 +1,9 @@
-package Automi;
+package automi;
 
 /*
-DFA che riconosca il linguaggio di stringhe che contengono il mio nome e tutte le stringhe
-ottenute dopo la sostituzione di un carattere del nome con uno qualsiasi  
-*/
+ * DFA che riconosca il linguaggio di stringhe che contengono il mio nome e tutte le stringhe
+ * ottenute dopo la sostituzione di un carattere del nome con uno qualsiasi  
+ */
 
 public class ex_1x7 {
     public static void main(String[] args) {

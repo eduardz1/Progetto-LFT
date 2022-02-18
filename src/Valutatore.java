@@ -222,7 +222,7 @@ public class Valutatore {
 
     public static void main(String[] args) {
         Lexer2x3 lex = new Lexer2x3();
-        String path = "src/File_Prova/prova.lft"; // il percorso del file da leggere
+        String path = "src/test_files/prova.lft"; // il percorso del file da leggere
         try {
             BufferedReader br = new BufferedReader(new FileReader(path));
             Valutatore valutatore = new Valutatore(lex, br);

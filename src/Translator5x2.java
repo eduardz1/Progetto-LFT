@@ -485,7 +485,7 @@ public class Translator5x2 {
 
             /* GUIDA[<expr> := ID] = {ID} */
             case Tag.ID: {
-                /* check if ID is was previously decalred, if not output an error */
+                /* check if ID is was previously declared, if not output an error */
                 int id_addr = st.lookupAddress(((Word) look).lexeme);
                 if (id_addr == -1)
                     error("Error in expr() : identifier not defined");
@@ -546,7 +546,7 @@ public class Translator5x2 {
 
     public static void main(String[] args) {
         Lexer2x3 lex = new Lexer2x3();
-        String path = "src/File_Prova/and_or_moodle.lft"; // il percorso del file da leggere
+        String path = "src/test_files/and_or_moodle.lft"; // il percorso del file da leggere
         try {
             BufferedReader br = new BufferedReader(new FileReader(path));
             Translator5x2 translator = new Translator5x2(lex, br);

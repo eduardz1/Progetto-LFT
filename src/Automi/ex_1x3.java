@@ -1,4 +1,16 @@
-package Automi;
+package automi;
+
+/* Progettare e implementare un DFA che riconosca il linguaggio di stringhe che
+ * contengono un numero di matricola seguito (subito) da un cognome, dove la combinazione di
+ * matricola e cognome corrisponde a studenti del corso A che hanno un numero di matricola pari
+ * oppure a studenti del corso B che hanno un numero di matricola dispari. 
+ * Si ricorda che gli studenti del corso A sono quelli con cognomi la cui iniziale 
+ * `e compresa tra A e K, e gli studenti del corso B sono quelli con cognomi 
+ * la cui iniziale `e compresa tra L e Z.
+ * Nel contesto di questo esercizio, un numero di matricola non ha un numero 
+ * prestabilito di cifre (ma deve essere composto di almeno una cifra). 
+ * Un cognome corrisponde a una sequenza di lettere, e deve essere composto di almeno una lettera.
+ */
 
 public class ex_1x3 {
     public static void main(String[] args) {

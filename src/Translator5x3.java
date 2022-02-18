@@ -586,7 +586,7 @@ public class Translator5x3 {
 
     public static void main(String[] args) {
         Lexer2x3 lex = new Lexer2x3();
-        String path = "src/File_Prova/and_or_moodle.lft"; // il percorso del file da leggere
+        String path = "src/test_files/and_or_moodle.lft"; // il percorso del file da leggere
         try {
             BufferedReader br = new BufferedReader(new FileReader(path));
             Translator5x3 translator = new Translator5x3(lex, br);

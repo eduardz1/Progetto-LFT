@@ -1,4 +1,4 @@
-package Automi;
+package automi;
 
 public class ex_1x10 {
     public static void main(String[] args) {
@@ -13,7 +13,7 @@ public class ex_1x10 {
         System.out.println(scan10("a/**/aa/***/a") == true);
         System.out.println(scan10("aaa/*/aa") == false);
         System.out.println(scan10("a/**//***a") == false);
-        System.out.println(scan10("aa/*aa") == false);
+        System.out.println(scan10("aa/*aa") == false);     
     }
 
     public static boolean scan10(String s) {
@@ -28,14 +28,14 @@ public class ex_1x10 {
                 case 0:
                     if (chAscii == '/')
                         state = 1;
-                    else if(chAscii == 'a' || chAscii == '*')
+                    else if (chAscii == 'a' || chAscii == '*')
                         state = 4;
                     else
                         state = -1;
                     break;
 
                 case 1:
-                    if(chAscii == '*')
+                    if (chAscii == '*')
                         state = 2;
                     else
                         state = -1;
@@ -44,18 +44,18 @@ public class ex_1x10 {
                 case 2:
                     if (chAscii == 'a' || chAscii == '/')
                         state = 2;
-                    else if(chAscii == '*')
+                    else if (chAscii == '*')
                         state = 3;
                     else
                         state = -1;
                     break;
 
                 case 3:
-                    if(chAscii == '/')
+                    if (chAscii == '/')
                         state = 4;
-                    else if(chAscii == 'a')    
+                    else if (chAscii == 'a')
                         state = 2;
-                    else if(chAscii == '*')
+                    else if (chAscii == '*')
                         state = 3;
                     else
                         state = -1;
@@ -71,11 +71,11 @@ public class ex_1x10 {
                     break;
 
                 case 5:
-                    if(chAscii == '/' || chAscii == 'a')
+                    if (chAscii == '/' || chAscii == 'a')
                         state = 4;
-                    else if(chAscii == '*')
+                    else if (chAscii == '*')
                         state = 2;
-                    else    
+                    else
                         state = -1;
             }
         }

@@ -1,7 +1,6 @@
 {
     "java.project.sourcePaths": [
-        "src/Alternative",
-        "src/Automi"
+        "src"
     ],
     "java.project.outputPath": "bin",
     "java.project.referencedLibraries": [

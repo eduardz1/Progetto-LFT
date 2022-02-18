@@ -210,9 +210,9 @@ public class Lexer2x3 {
                 }
                 
                 if(number.charAt(0) != '0')
-                    return new Word(Tag.NUM, number);
+                    return new NumberTok(Tag.NUM, number);
                 else
-                    return new Word(Tag.NUM, "0");
+                    return new NumberTok(Tag.NUM, "0");
 
             } else {
                 System.err.println("Erroneous character: " + peek);
@@ -223,7 +223,7 @@ public class Lexer2x3 {
 
     public static void main(String[] args) {
         Lexer2x3 lex = new Lexer2x3();
-        String path = "src/File_Prova/test_lexer.lft"; // il percorso del file da leggere
+        String path = "src/test_files/test_lexer3.lft"; // il percorso del file da leggere
         try {
             BufferedReader br = new BufferedReader(new FileReader(path));
             Token tok;

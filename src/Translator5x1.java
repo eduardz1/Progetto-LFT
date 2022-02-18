@@ -1,5 +1,3 @@
-
-
 import java.io.*;
 
 // dobbiamo scrivere le azioni semantiche per ogni produzione
@@ -207,7 +205,6 @@ public class Translator5x1 {
              * caso vero
              * l1
              * corpo else
-             * 
              */
 
             /* GUIDA[<statp> := else<stat>end] = {else} */
@@ -473,7 +470,7 @@ public class Translator5x1 {
 
     public static void main(String[] args) {
         Lexer2x3 lex = new Lexer2x3();
-        String path = "src/File_Prova/max_tre_num.lft"; // il percorso del file da leggere
+        String path = "src/test_files/factorial.lft"; // il percorso del file da leggere
         try {
             BufferedReader br = new BufferedReader(new FileReader(path));
             Translator5x1 translator = new Translator5x1(lex, br);

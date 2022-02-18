@@ -1,8 +1,15 @@
 public class Token {
-    public final int tag;
-    public Token(int t) { tag = t;  }
-    public String toString() {return "<" + tag + ">";}
-    public static final Token
+	public final int tag;
+
+	public Token(int t) {
+		tag = t;
+	}
+
+	public String toString() {
+		return "<" + tag + ">";
+	}
+
+	public static final Token 
 		not = new Token('!'),
 		lpt = new Token('('),
 		rpt = new Token(')'),

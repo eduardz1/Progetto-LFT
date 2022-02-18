@@ -1,4 +1,4 @@
-package Automi;
+package automi;
 
 public class ex_1x8 {
 
