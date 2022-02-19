@@ -2,7 +2,8 @@ import java.io.*;
 
 public class Lexer2x3 {
 
-    private final String identifier_RE = "[a-zA-Z[_[_]*[a-zA-Z0-9]]][a-zA-Z0-9_]*"; // espressione regolare per gli identificatori
+    private final String identifier_RE = "[a-zA-Z[_[_]*[a-zA-Z0-9]]][a-zA-Z0-9_]*"; // espressione regolare per gli
+                                                                                    // identificatori
     public int line = 1;
     private char peek = ' ';
 
@@ -22,202 +23,206 @@ public class Lexer2x3 {
         }
 
         switch (peek) {
-        case '!':
-            peek = ' ';
-            return Token.not;
-
-        case '(':
-            peek = ' ';
-            return Token.lpt;
-
-        case ')':
-            peek = ' ';
-            return Token.rpt;
-
-        case '{':
-            peek = ' ';
-            return Token.lpg;
-
-        case '}':
-            peek = ' ';
-            return Token.rpg;
-
-        case '+':
-            peek = ' ';
-            return Token.plus;
-
-        case '-':
-            peek = ' ';
-            return Token.minus;
-
-        case '*':
-            peek = ' ';
-            return Token.mult;
-
-        case '/': // implementazione commenti
-            readch(br);
-            if (peek == '/') {
-                while(peek != '\n')
-                    readch(br);
+            case '!':
                 peek = ' ';
-                return lexical_scan(br);
-            } else if (peek == '*') {
+                return Token.not;
+
+            case '(':
+                peek = ' ';
+                return Token.lpt;
+
+            case ')':
+                peek = ' ';
+                return Token.rpt;
+
+            case '{':
+                peek = ' ';
+                return Token.lpg;
+
+            case '}':
+                peek = ' ';
+                return Token.rpg;
+
+            case '+':
+                peek = ' ';
+                return Token.plus;
+
+            case '-':
+                peek = ' ';
+                return Token.minus;
+
+            case '*':
+                peek = ' ';
+                return Token.mult;
+
+            case '/':
                 readch(br);
-                while (peek != (char) -1) {
-                    readch(br);
-                    while (peek == '*') {
+                switch (peek) {
+                    case '/': // in-line comment
+                        for (; peek != '\n' && peek != (char)Tag.EOF; readch(br));
+            
+                        return lexical_scan(br);
+
+                    case '*': // multi-line comment
                         readch(br);
-                        if (peek == '/') {
-                            peek = ' ';
-                            return lexical_scan(br);
+
+                        while (peek != Tag.EOF) {
+                            readch(br);
+
+                            while (peek == '*') {
+                                readch(br);
+                                if (peek == '/') {
+                                    peek = ' ';
+                                    return lexical_scan(br);
+                                }
+                            }
                         }
-                    }
-                }
-                System.err.println("Erroneous comment");
-                return null;
-            }
-            return Token.div;
-
-        case ';':
-            peek = ' ';
-            return Token.semicolon;
-
-        case ',':
-            peek = ' ';
-            return Token.comma;
-
-        case '&':
-            readch(br);
-            if (peek == '&') {
-                peek = ' ';
-                return Word.and;
-            } else {
-                System.err.println("Erroneous character" + " after & : " + peek);
-                return null;
-            }
-
-        case '|':
-            readch(br);
-            if (peek == '|') {
-                peek = ' ';
-                return Word.or;
-            } else {
-                System.err.println("Erroneous character" + " after | : " + peek);
-                return null;
-            }
-
-        case '<':
-            readch(br);
-            if (peek == '>') {
-                peek = ' ';
-                return Word.ne;
-            } else if (peek == '=') {
-                peek = ' ';
-                return Word.le;
-            } else if (peek == ' ' || Character.isLetterOrDigit(peek)) {
-                // NO --> peek = ' '; otherwise we eat an extra char
-                return Word.lt;
-            } else {
-                System.err.println("Erroneous character" + " after < : " + peek);
-                return null;
-            }
-
-        case '>':
-            readch(br);
-            if (peek == '=') {
-                peek = ' ';
-                return Word.ge;
-            } else if (peek == ' ' || Character.isLetterOrDigit(peek)) {
-                // NO --> peek = ' '; otherwise we eat an extra char
-                return Word.gt;
-            } else {
-                System.err.println("Erroneous character" + " after > : " + peek);
-                return null;
-            }
-
-        case '=':
-            readch(br);
-            if (peek == '=') {
-                peek = ' ';
-                return Word.eq;
-            } else {
-                System.err.println("Erroneous character" + " after = : " + peek);
-                return null;
-            }
-
-        case (char) -1:
-            return new Token(Tag.EOF);
-
-        default:
-            if (Character.isLetter(peek) || peek == '_') { // gestisco identificatori e parole chiave
-                String identifier = "";
-                while(Character.isLetterOrDigit(peek) || peek == '_'){
-                    identifier+=peek;
-                    readch(br);
-                }
-
-                switch (identifier){
-
-                    case "assign":
-                        return Word.assign;
-
-                    case "to":
-                        return Word.to;
-
-                    case "if":
-                        return Word.iftok;
-
-                    case "else":
-                        return Word.elsetok;
-
-                    case "while":
-                        return Word.whiletok;
-
-                    case "begin":
-                        return Word.begin;
-
-                    case "end":
-                        return Word.end;
-
-                    case "print":
-                        return Word.print;
-
-                    case "read":
-                        return Word.read;
-
-                    case "or":
-                        return Word.or;
-
-                    case "and":
-                        return Word.and;
+                        System.err.println("Erroneous comment");
+                        return null;
 
                     default:
-                        if(identifier.matches(identifier_RE)){
-                            return new Word(Tag.ID, identifier);
-                        }
-                        System.err.println("Syntax error in: " + identifier);
-                        return null;
-                        
+                        return Token.div;
                 }
 
+            case ';':
+                peek = ' ';
+                return Token.semicolon;
 
-            } else if (Character.isDigit(peek)) {
+            case ',':
+                peek = ' ';
+                return Token.comma;
 
-                String number = "";
-                while (Character.isDigit(peek)) {
-                    number += peek;
-                    readch(br);
+            case '&':
+                readch(br);
+                if (peek == '&') {
+                    peek = ' ';
+                    return Word.and;
+                } else {
+                    System.err.println("Erroneous character" + " after & : " + peek);
+                    return null;
                 }
-                
-                if(number.charAt(0) != '0')
-                    return new NumberTok(Tag.NUM, number);
-                else
-                    return new NumberTok(Tag.NUM, "0");
 
-            } else {
-                System.err.println("Erroneous character: " + peek);
-                return null;
-            }
+            case '|':
+                readch(br);
+                if (peek == '|') {
+                    peek = ' ';
+                    return Word.or;
+                } else {
+                    System.err.println("Erroneous character" + " after | : " + peek);
+                    return null;
+                }
+
+            case '<':
+                readch(br);
+                if (peek == '>') {
+                    peek = ' ';
+                    return Word.ne;
+                } else if (peek == '=') {
+                    peek = ' ';
+                    return Word.le;
+                } else if (peek == ' ' || Character.isLetterOrDigit(peek)) {
+                    // NO --> peek = ' '; otherwise we eat an extra char
+                    return Word.lt;
+                } else {
+                    System.err.println("Erroneous character" + " after < : " + peek);
+                    return null;
+                }
+
+            case '>':
+                readch(br);
+                if (peek == '=') {
+                    peek = ' ';
+                    return Word.ge;
+                } else if (peek == ' ' || Character.isLetterOrDigit(peek)) {
+                    // NO --> peek = ' '; otherwise we eat an extra char
+                    return Word.gt;
+                } else {
+                    System.err.println("Erroneous character" + " after > : " + peek);
+                    return null;
+                }
+
+            case '=':
+                readch(br);
+                if (peek == '=') {
+                    peek = ' ';
+                    return Word.eq;
+                } else {
+                    System.err.println("Erroneous character" + " after = : " + peek);
+                    return null;
+                }
+
+            case (char) -1:
+                return new Token(Tag.EOF);
+
+            default:
+                if (Character.isLetter(peek) || peek == '_') { // gestisco identificatori e parole chiave
+                    String identifier = "";
+                    while (Character.isLetterOrDigit(peek) || peek == '_') {
+                        identifier += peek;
+                        readch(br);
+                    }
+
+                    switch (identifier) {
+
+                        case "assign":
+                            return Word.assign;
+
+                        case "to":
+                            return Word.to;
+
+                        case "if":
+                            return Word.iftok;
+
+                        case "else":
+                            return Word.elsetok;
+
+                        case "while":
+                            return Word.whiletok;
+
+                        case "begin":
+                            return Word.begin;
+
+                        case "end":
+                            return Word.end;
+
+                        case "print":
+                            return Word.print;
+
+                        case "read":
+                            return Word.read;
+
+                        case "or":
+                            return Word.or;
+
+                        case "and":
+                            return Word.and;
+
+                        default:
+                            if (identifier.matches(identifier_RE)) {
+                                return new Word(Tag.ID, identifier);
+                            }
+                            System.err.println("Syntax error in: " + identifier);
+                            return null;
+
+                    }
+
+                } else if (Character.isDigit(peek)) {
+
+                    String number = "";
+                    while (Character.isDigit(peek)) {
+                        number += peek;
+                        readch(br);
+                    }
+
+                    if (number.charAt(0) != '0')
+                        return new NumberTok(Tag.NUM, number);
+                    else
+                        return new NumberTok(Tag.NUM, "0");
+
+                } else {
+                    System.err.println("Erroneous character: " + peek);
+                    return null;
+                }
         }
     }
 

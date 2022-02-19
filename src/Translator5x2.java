@@ -1,8 +1,5 @@
-
-
 import java.io.*;
 
-// dobbiamo scrivere le azioni semantiche per ogni produzione
 public class Translator5x2 {
     private Lexer2x3 lex;
     private BufferedReader pbr;
@@ -207,16 +204,10 @@ public class Translator5x2 {
                 int if_false = code.newLabel();
                 int if_end = code.newLabel();
 
-                /*
-                 * if still to be worked on, label in wrong order, need to add goto to jmp
-                 * if(false) condition instead of executing it after if(true)
-                 */
-
                 match(Tag.IF);
                 match(Tag.LPT);
 
                 bexprp(if_true, if_false);
-                // bexpr(if_true, if_false);
                 match(Tag.RPT);
 
                 code.emitLabel(if_true);
@@ -235,7 +226,7 @@ public class Translator5x2 {
              */
             case '{':
                 match(Tag.LPG);
-                statlist(0); // not sure about that one
+                statlist(0);
                 match(Tag.RPG);
                 break;
 
@@ -328,22 +319,15 @@ public class Translator5x2 {
                 int id_addr = st.lookupAddress(((Word) look).lexeme);
                 if (id_addr == -1) {
                     id_addr = count;
-                    // if (read_assign == 0)
-                    st.insert(((Word) look).lexeme, count++);
-                    // error("Error in expr() : Identifier not defined: " + ((Word) look).lexeme);
-                }
-                match(Tag.ID);
-                if (read_assign == 0) {
-                    code.emit(OpCode.istore, id_addr);
-                } else {
-                    code.emit(OpCode.invokestatic, 0);
-                    code.emit(OpCode.istore, id_addr);
-                }
 
-                /*
-                 * code.emit(OpCode.iload, id_addr);
-                 * code.emit(OpCode.invokestatic, 1);
-                 */
+                    st.insert(((Word) look).lexeme, count++);
+                }
+                
+                match(Tag.ID);
+
+                if (read_assign == 1)
+                    code.emit(OpCode.invokestatic, 0);
+                code.emit(OpCode.istore, id_addr);
 
                 idlistp(read_assign);
                 break;
@@ -373,8 +357,8 @@ public class Translator5x2 {
                 expr();
 
                 switch (relop) {
-                    case "<" -> code.emit(OpCode.if_icmplt, label_true);
-                    case ">" -> code.emit(OpCode.if_icmpgt, label_true);
+                    case "<"  -> code.emit(OpCode.if_icmplt, label_true);
+                    case ">"  -> code.emit(OpCode.if_icmpgt, label_true);
                     case "==" -> code.emit(OpCode.if_icmpeq, label_true);
                     case "<=" -> code.emit(OpCode.if_icmple, label_true);
                     case "<>" -> code.emit(OpCode.if_icmpne, label_true);
@@ -446,8 +430,6 @@ public class Translator5x2 {
                 match(Tag.LPT);
                 exprlist(0); // pass 0 to identify sum
                 match(Tag.RPT);
-
-                code.emit(OpCode.iadd);
                 break;
             }
 
@@ -465,7 +447,6 @@ public class Translator5x2 {
                 match(Tag.LPT);
                 exprlist(2); // pass 2 to identify mul
                 match(Tag.RPT);
-                code.emit(OpCode.imul);
                 break;
 
             /* GUIDA[<expr> := /<expr><expr>] = {/} */
@@ -479,7 +460,6 @@ public class Translator5x2 {
             /* GUIDA[<expr> := NUM] = {NUM} */
             case Tag.NUM:
                 code.emit(OpCode.ldc, ((NumberTok) look).value);
-
                 match(Tag.NUM);
                 break;
 
@@ -508,11 +488,10 @@ public class Translator5x2 {
              */
             case '+', '-', '*', '/', Tag.NUM, Tag.ID:
                 expr();
-
+                
                 if (sum_print_mul == 1)
                     code.emit(OpCode.invokestatic, 1); // invokestatic Output/print(I)V
-
-                /* we still need to manage the case *(NUM) and +(NUM) */
+                
                 exprlistp(sum_print_mul);
                 break;
 
@@ -522,17 +501,20 @@ public class Translator5x2 {
         }
     }
 
-    private void exprlistp(int invokestatic) {
+    private void exprlistp(int sum_print_mul) { /* 0==sum, 1==print, 2==mul */
         switch (look.tag) {
             /* GUIDA[<exprlistp> := ,<expr><exprlistp>] = {,} */
             case ',':
                 match(Tag.COM);
-
-                if (invokestatic == 1)
-                    code.emit(OpCode.invokestatic, 1); // invokestatic Output/print(I)V
-
                 expr();
-                exprlistp(0); // need to check that
+
+                switch (sum_print_mul) {
+                    case 0 -> code.emit(OpCode.iadd);
+                    case 1 -> code.emit(OpCode.invokestatic, 1); // invokestatic Output/print(I)V
+                    case 2 -> code.emit(OpCode.imul);
+                }
+
+                exprlistp(sum_print_mul);
                 break;
 
             /* GUIDA[<exprlistp> := ε] = FOLLOW[<exprlistp>] = {)} */
@@ -546,7 +528,7 @@ public class Translator5x2 {
 
     public static void main(String[] args) {
         Lexer2x3 lex = new Lexer2x3();
-        String path = "src/test_files/and_or_moodle.lft"; // il percorso del file da leggere
+        String path = "src/test_files/test_o.lft"; // il percorso del file da leggere
         try {
             BufferedReader br = new BufferedReader(new FileReader(path));
             Translator5x2 translator = new Translator5x2(lex, br);

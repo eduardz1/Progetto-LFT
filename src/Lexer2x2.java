@@ -55,23 +55,6 @@ public class Lexer2x2 {
             return Token.mult;
 
         case '/':
-            readch(br);
-            if (peek == '/') {
-                peek = '\n';
-                return null;
-            } else if (peek == '*') {
-                readch(br);
-                while (peek != (char) -1) {
-                    if (peek == '*') {
-                        readch(br);
-                        if (peek == '/') {
-                            return null;
-                        }
-                    }
-                }
-                System.err.println("ERROR");
-                return null;
-            }
             peek = ' ';
             return Token.div;
 
@@ -111,8 +94,7 @@ public class Lexer2x2 {
             } else if (peek == '=') {
                 peek = ' ';
                 return Word.le;
-            } else if (peek == ' ') {
-                peek = ' ';
+            } else if (peek == ' ' || Character.isLetterOrDigit(peek)) {  
                 return Word.lt;
             } else {
                 System.err.println("Erroneous character" + " after < : " + peek);
@@ -124,8 +106,7 @@ public class Lexer2x2 {
             if (peek == '=') {
                 peek = ' ';
                 return Word.ge;
-            } else if (peek == ' ') {
-                peek = ' ';
+            } else if (peek == ' ' || Character.isLetterOrDigit(peek)) {
                 return Word.gt;
             } else {
                 System.err.println("Erroneous character" + " after > : " + peek);
@@ -146,15 +127,14 @@ public class Lexer2x2 {
             return new Token(Tag.EOF);
 
         default:
-            if (Character.isLetter(peek) || peek == '_') { // gestisco identificatori e parole chiave
-                
+            if (Character.isLetter(peek) || peek == '_') { // gestisco identificatori e parole chiave             
                 String identifier = "";
-                while(Character.isLetterOrDigit(peek) || peek == '_'){
-                    identifier+=peek;
+                while (Character.isLetterOrDigit(peek) || peek == '_') {
+                    identifier += peek;
                     readch(br);
                 }
 
-                switch (identifier){
+                switch (identifier) {
 
                     case "assign":
                         return Word.assign;
@@ -190,14 +170,13 @@ public class Lexer2x2 {
                         return Word.and;
 
                     default:
-                        if(identifier.matches(identifier_RE)){
+                        if (identifier.matches(identifier_RE)) {
                             return new Word(Tag.ID, identifier);
                         }
                         System.err.println("Syntax error in: " + identifier);
                         return null;
                         
                 }
-
 
             } else if (Character.isDigit(peek)) {
 
@@ -207,7 +186,7 @@ public class Lexer2x2 {
                     readch(br);
                 }
                 
-                if(number.charAt(0) != '0')
+                if (number.charAt(0) != '0')
                     return new NumberTok(Tag.NUM, number);
                 else
                     return new NumberTok(Tag.NUM, "0");

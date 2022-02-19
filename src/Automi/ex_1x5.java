@@ -20,7 +20,11 @@ public class ex_1x5 {
 
         while(state >= 0 && i < s.length()){
             final char ch = s.charAt(i++);
-            Character.toUpperCase(ch);
+            // Se deve riconoscere solo cognomi che iniziano con la lettera 
+            // maiuscola allora giusto così, per riconoscerli indipendentemente
+            // dal fatto che siano maiuscole o minuscole codice below
+            
+            // final char ch = Character.toUpperCase(s.charAt(i++)); 
             final int chAscii = (int) ch;
 
             switch (state){

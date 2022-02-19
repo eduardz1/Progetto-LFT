@@ -21,17 +21,18 @@ public class ex_1x8 {
 
         while (state >= 0 && i < s.length()) {
             final char ch = s.charAt(i++);
-            Character.toUpperCase(ch);
+            // if upper case E should also be accepted:
+            // final char ch = Character.toUpperCase(s.charAt(i++));
             final int chAscii = (int) ch;
 
             switch (state) {
                 case 0:
-                    if (chAscii == '+' && chAscii =='-') 
+                    if (chAscii == '+' && chAscii == '-') 
                         state = 1;
-                    else if (ch =='.'||chAscii ==',') 
+                    else if (ch == '.'|| chAscii == ',') 
                         state = 2;
                     else if (Character.isDigit(ch))
-                    state = 3;
+                        state = 3;
                     else
                         state = -1;
                     break;
@@ -39,24 +40,24 @@ public class ex_1x8 {
                 case 1:
                     if (Character.isDigit(ch))
                         state = 3;
-                    else if (ch =='.'||ch ==',')
+                    else if (ch == '.' || ch ==',')
                         state = 2;
                     else
                         state = -1;
                     break;
 
                 case 2:
-                    if (ch =='.'||ch ==',')
+                    if (ch == '.' || ch ==',')
                         state = 3;
                     else
                         state = -1;
                     break;
 
                 case 3:
-                    if (ch =='e')
+                    if (ch == 'e')
                         state = 4;
                     else if (Character.isDigit(ch))
-                    state = 3;
+                        state = 3;
                     else
                         state = -1;
                     break;
@@ -64,9 +65,9 @@ public class ex_1x8 {
                 case 4:
                     if (Character.isDigit(ch))
                         state = 7;
-                    else if (ch =='.'||ch ==',')
+                    else if (ch == '.' || ch ==',')
                         state = 6;
-                    else if (ch =='+'||ch =='-')
+                    else if (ch == '+' || ch =='-')
                         state = 5;
                     else
                         state = -1;
@@ -75,7 +76,7 @@ public class ex_1x8 {
                 case 5:
                     if (Character.isDigit(ch))
                         state = 7;
-                    else if (ch =='.'||ch ==',')
+                    else if (ch == '.' || ch ==',')
                         state = 6;
                     else
                         state = -1;
@@ -89,7 +90,7 @@ public class ex_1x8 {
                     break;
                 case 7: 
                     if (Character.isDigit(ch))
-                    state = 7;
+                        state = 7;
                     break;
             }
         }

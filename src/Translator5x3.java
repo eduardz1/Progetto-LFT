@@ -206,11 +206,6 @@ public class Translator5x3 {
                 int if_false = code.newLabel();
                 int if_end = code.newLabel();
 
-                /*
-                 * if still to be worked on, label in wrong order, need to add goto to jmp
-                 * if(false) condition instead of executing it after if(true)
-                 */
-
                 match(Tag.IF);
                 match(Tag.LPT);
 
@@ -328,9 +323,7 @@ public class Translator5x3 {
                 int id_addr = st.lookupAddress(((Word) look).lexeme);
                 if (id_addr == -1) {
                     id_addr = count;
-                    // if (read_assign == 0)
                     st.insert(((Word) look).lexeme, count++);
-                    // error("Error in expr() : Identifier not defined: " + ((Word) look).lexeme);
                 }
                 match(Tag.ID);
                 if (read_assign == 0) {
@@ -339,11 +332,6 @@ public class Translator5x3 {
                     code.emit(OpCode.invokestatic, 0);
                     code.emit(OpCode.istore, id_addr);
                 }
-
-                /*
-                 * code.emit(OpCode.iload, id_addr);
-                 * code.emit(OpCode.invokestatic, 1);
-                 */
 
                 idlistp(read_assign);
                 break;
@@ -373,8 +361,8 @@ public class Translator5x3 {
                 expr();
 
                 switch (relop) {
-                    case "<" -> code.emit(OpCode.if_icmplt, label_true);
-                    case ">" -> code.emit(OpCode.if_icmpgt, label_true);
+                    case "<"  -> code.emit(OpCode.if_icmplt, label_true);
+                    case ">"  -> code.emit(OpCode.if_icmpgt, label_true);
                     case "==" -> code.emit(OpCode.if_icmpeq, label_true);
                     case "<=" -> code.emit(OpCode.if_icmple, label_true);
                     case "<>" -> code.emit(OpCode.if_icmpne, label_true);
@@ -456,8 +444,8 @@ public class Translator5x3 {
                 expr();
 
                 switch (relop) {
-                    case "<" -> code.emit(OpCode.if_icmplt, label_true);
-                    case ">" -> code.emit(OpCode.if_icmpgt, label_true);
+                    case "<"  -> code.emit(OpCode.if_icmplt, label_true);
+                    case ">"  -> code.emit(OpCode.if_icmpgt, label_true);
                     case "==" -> code.emit(OpCode.if_icmpeq, label_true);
                     case "<=" -> code.emit(OpCode.if_icmple, label_true);
                     case "<>" -> code.emit(OpCode.if_icmpne, label_true);
@@ -486,8 +474,6 @@ public class Translator5x3 {
                 match(Tag.LPT);
                 exprlist(0); // pass 0 to identify sum
                 match(Tag.RPT);
-
-                code.emit(OpCode.iadd);
                 break;
             }
 
@@ -505,7 +491,6 @@ public class Translator5x3 {
                 match(Tag.LPT);
                 exprlist(2); // pass 2 to identify mul
                 match(Tag.RPT);
-                code.emit(OpCode.imul);
                 break;
 
             /* GUIDA[<expr> := /<expr><expr>] = {/} */
@@ -552,7 +537,6 @@ public class Translator5x3 {
                 if (sum_print_mul == 1)
                     code.emit(OpCode.invokestatic, 1); // invokestatic Output/print(I)V
 
-                /* we still need to manage the case *(NUM) and +(NUM) */
                 exprlistp(sum_print_mul);
                 break;
 
@@ -562,17 +546,20 @@ public class Translator5x3 {
         }
     }
 
-    private void exprlistp(int invokestatic) {
+    private void exprlistp(int sum_print_mul) { /* 0==sum, 1==print, 2==mul */
         switch (look.tag) {
             /* GUIDA[<exprlistp> := ,<expr><exprlistp>] = {,} */
             case ',':
-                match(Tag.COM);
+            match(Tag.COM);
+            expr();
 
-                if (invokestatic == 1)
-                    code.emit(OpCode.invokestatic, 1); // invokestatic Output/print(I)V
+            switch (sum_print_mul) {
+                case 0 -> code.emit(OpCode.iadd);
+                case 1 -> code.emit(OpCode.invokestatic, 1); // invokestatic Output/print(I)V
+                case 2 -> code.emit(OpCode.imul);
+            }
 
-                expr();
-                exprlistp(0); // need to check that
+            exprlistp(sum_print_mul);
                 break;
 
             /* GUIDA[<exprlistp> := ε] = FOLLOW[<exprlistp>] = {)} */
