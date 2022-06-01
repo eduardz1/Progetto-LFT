@@ -1,8 +1,8 @@
 import java.io.*;
 
 public class Parser3x2 {
-    private Lexer2x3 lex;
-    private BufferedReader pbr;
+    private final Lexer2x3 lex;
+    private final BufferedReader pbr;
     private Token look;
 
     public Parser3x2(Lexer2x3 l, BufferedReader br) {
@@ -34,40 +34,12 @@ public class Parser3x2 {
              * GUIDA[<prog> := <statlist>EOF] = FIRST[<stat>]
              * FIRST[<stat>] = {assign} U {print} U {read} U {while} U {if} U {{}
              */
-            case Tag.ASSIGN:
+            case Tag.ASSIGN, '{', Tag.IF, Tag.WHILE, Tag.READ, Tag.PRINT -> {
                 // no match because the production does not ask us to
                 statlist();
                 match(Tag.EOF);
-                break;
-
-            case Tag.PRINT:
-                statlist();
-                match(Tag.EOF);
-                break;
-
-            case Tag.READ:
-                statlist();
-                match(Tag.EOF);
-                break;
-
-            case Tag.WHILE:
-                statlist();
-                match(Tag.EOF);
-                break;
-
-            case Tag.IF:
-                statlist();
-                match(Tag.EOF);
-                break;
-
-            case '{':
-                statlist();
-                match(Tag.EOF);
-                break;
-
-            default:
-                error("Error in prog");
-
+            }
+            default -> error("Error in prog");
         }
     }
 
@@ -77,39 +49,12 @@ public class Parser3x2 {
              * GUIDA[<statlist> := <stat><statlistp>] = FIRST[<stat>]
              * FIRST[<stat>] = {assign} U {print} U {read} U {while} U {if} U {{}
              */
-            case Tag.ASSIGN:
+            case Tag.ASSIGN, '{', Tag.IF, Tag.WHILE, Tag.READ, Tag.PRINT -> {
                 // same as before, we must not match here
                 stat();
                 statlistp();
-                break;
-
-            case Tag.PRINT:
-                stat();
-                statlistp();
-                break;
-
-            case Tag.READ:
-                stat();
-                statlistp();
-                break;
-
-            case Tag.WHILE:
-                stat();
-                statlistp();
-                break;
-
-            case Tag.IF:
-                stat();
-                statlistp();
-                break;
-
-            case '{':
-                stat();
-                statlistp();
-                break;
-
-            default:
-                error("Error in statlist");
+            }
+            default -> error("Error in statlist");
         }
     }
 
@@ -138,91 +83,81 @@ public class Parser3x2 {
     public void stat() {
         switch (look.tag) {
             // GUIDA[<stat> := assign<expr>to<idlist>] = {assign}
-            case Tag.ASSIGN:
+            case Tag.ASSIGN -> {
                 match(Tag.ASSIGN);
                 expr();
                 match(Tag.TO);
                 idlist();
-                break;
+            }
 
             // GUIDA[<stat> := print(<expr>)] = {print}
-            case Tag.PRINT:
+            case Tag.PRINT -> {
                 match(Tag.PRINT);
                 match(Tag.LPT);
                 exprlist();
                 match(Tag.RPT);
-                break;
+            }
 
             // GUIDA[<stat> := read(<expr>)] = {read}
-            case Tag.READ:
+            case Tag.READ -> {
                 match(Tag.READ);
                 match(Tag.LPT);
                 idlist();
                 match(Tag.RPT);
-                break;
+            }
 
             // GUIDA[<stat> := while(<bexpr>)] = {while}
-            case Tag.WHILE:
+            case Tag.WHILE -> {
                 match(Tag.WHILE);
                 match(Tag.LPT);
                 bexpr();
                 match(Tag.RPT);
                 stat();
-                break;
+            }
 
             // GUIDA[<stat> := if(<bexpr>)<stat><statp>] = {if}
-            case Tag.IF:
+            case Tag.IF -> {
                 match(Tag.IF);
                 match(Tag.LPT);
                 bexpr();
                 match(Tag.RPT);
                 stat();
                 statp();
-                break;
+            }
 
             // GUIDA[<stat> := {<statlist>}] = {{}
-            case '{':
+            case '{' -> {
                 match(Tag.LPG);
                 statlist();
                 match(Tag.RPG);
-                break;
-
-            default:
-                error("Error in stat");
+            }
+            default -> error("Error in stat");
         }
     }
 
     public void statp() {
         switch (look.tag) {
             // GUIDA[<statp> := end] = {end}
-            case Tag.END:
-                match(Tag.END);
-                break;
+            case Tag.END -> match(Tag.END);
+
 
             // GUIDA[<statp> := else<stat>end] = {else}
-            case Tag.ELSE:
+            case Tag.ELSE -> {
                 match(Tag.ELSE);
                 stat();
                 match(Tag.END);
-                break;
-
-            default:
-                error("Error in stat");
-
+            }
+            default -> error("Error in stat");
         }
     }
 
     public void idlist() {
-        switch (look.tag) {
-            // GUIDA[<idlist> := ID<idlistp>] = {ID}
-            case Tag.ID:
-                match(Tag.ID);
-                idlistp();
-                break;
-
-            default:
-                error("Error in idlist");
-
+        // GUIDA[<idlist> := ID<idlistp>] = {ID}
+        if (look.tag == Tag.ID) {
+            match(Tag.ID);
+            idlistp();
+        } else {
+            error("Error in idlist");
         }
     }
 
@@ -243,18 +178,14 @@ public class Parser3x2 {
                 break;
 
             case ';':
-                break;
-
-            case '}':
-                break;
-
-            case Tag.END:
-                break;
-
-            case Tag.ELSE:
-                break;
 
             case ')':
+
+            case Tag.ELSE:
+
+            case Tag.END:
+
+            case '}':
                 break;
 
             default:
@@ -264,65 +195,55 @@ public class Parser3x2 {
     }
 
     public void bexpr() {
-        switch (look.tag) {
-            // GUIDA[<bexpr> := RELOP<expr><expr>] = {RELOP}
-            case Tag.RELOP:
-                match(Tag.RELOP);
-                expr();
-                expr();
-                break;
-
-            default:
-                error("Error in bexpr");
-
+        // GUIDA[<bexpr> := RELOP<expr><expr>] = {RELOP}
+        if (look.tag == Tag.RELOP) {
+            match(Tag.RELOP);
+            expr();
+            expr();
+        } else {
+            error("Error in bexpr");
         }
     }
 
     public void expr() {
         switch (look.tag) {
             // GUIDA[<expr> := +(<exprlist>)] = {+}
-            case '+':
+            case '+' -> {
                 match(Tag.SUM);
                 match(Tag.LPT);
                 exprlist();
                 match(Tag.RPT);
-                break;
+            }
 
             // GUIDA[<expr> := -<expr><expr>] = {-}
-            case '-':
+            case '-' -> {
                 match(Tag.SUB);
                 expr();
                 expr();
-                break;
+            }
 
             // GUIDA[<expr> := *(<exprlist>)] = {*}
-            case '*':
+            case '*' -> {
                 match(Tag.MUL);
                 match(Tag.LPT);
                 exprlist();
                 match(Tag.RPT);
-                break;
+            }
 
             // GUIDA[<expr> := /<expr><expr>] = {/}
-            case '/':
+            case '/' -> {
                 match(Tag.DIV);
                 expr();
                 expr();
-                break;
+            }
 
             // GUIDA[<expr> := NUM] = {NUM}
-            case Tag.NUM:
-                match(Tag.NUM);
-                break;
+            case Tag.NUM -> match(Tag.NUM);
+
 
             // GUIDA[<expr> := ID] = {ID}
-            case Tag.ID:
-                match(Tag.ID);
-                break;
-
-            default:
-                error("Error in expr");
-
+            case Tag.ID -> match(Tag.ID);
+            default -> error("Error in expr");
         }
     }
 
@@ -332,40 +253,12 @@ public class Parser3x2 {
              * GUIDA[<exprlist> := <expr><exprlistp>] = FIRST[<expr>]
              * FIRST[<expr>] = {+} U {-} U {*} U {/} U {NUM} U {ID}
              */
-            case '+':
+            case '+', '-', '*', '/', Tag.NUM, Tag.ID -> {
                 // same as before we recognize the tags but avoid matching any of them
                 expr();
                 exprlistp();
-                break;
-
-            case '-':
-                expr();
-                exprlistp();
-                break;
-
-            case '*':
-                expr();
-                exprlistp();
-                break;
-
-            case '/':
-                expr();
-                exprlistp();
-                break;
-
-            case Tag.NUM:
-                expr();
-                exprlistp();
-                break;
-
-            case Tag.ID:
-                expr();
-                exprlistp();
-                break;
-
-            default:
-                error("Error in exprlist");
-
+            }
+            default -> error("Error in exprlist");
         }
     }
 

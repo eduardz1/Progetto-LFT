@@ -1,5 +1,5 @@
 public class NumberTok extends Token {
-	public int value;
+	public final int value;
 
 	public NumberTok(int tag, String s){
 		super(tag);

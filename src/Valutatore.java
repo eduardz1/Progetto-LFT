@@ -1,8 +1,8 @@
 import java.io.*;
 
 public class Valutatore {
-    private Lexer2x3 lex;
-    private BufferedReader pbr;
+    private final Lexer2x3 lex;
+    private final BufferedReader pbr;
     private Token look;
 
     public Valutatore(Lexer2x3 l, BufferedReader br) {
@@ -32,20 +32,17 @@ public class Valutatore {
         int expr_val;
 
         switch (look.tag) {
-            case '(':
+            case '(' -> {
                 expr_val = expr();
                 match(Tag.EOF);
                 System.out.println(expr_val);
-                break;
-
-            case Tag.NUM:
+            }
+            case Tag.NUM -> {
                 expr_val = expr();
                 match(Tag.EOF);
                 System.out.println(expr_val);
-                break;
-
-            default:
-                error("Error in start");
+            }
+            default -> error("Error in start");
         }
     }
 
@@ -54,14 +51,6 @@ public class Valutatore {
 
         switch (look.tag) {
             case '(':
-                /*
-                 * term_val = term();
-                 * exprp_i = term_val;
-                 * exprp_val = exprp(exprp_i);
-                 * expr_val = exprp_val;
-                 * return expr_val;
-                 */
-                return exprp(term());
 
             case Tag.NUM:
                 /*
@@ -110,7 +99,6 @@ public class Valutatore {
                 return exprp(exprp_i - term());
 
             case ')':
-                break;
 
             case -1:
                 break;
@@ -126,14 +114,6 @@ public class Valutatore {
 
         switch (look.tag) {
             case '(':
-                /*
-                 * fact_val = fact();
-                 * termp_i = fact_val;
-                 * termp_val = termp(termp_i);
-                 * term_val = termp_val;
-                 * return term_val;
-                 */
-                return termp(fact());
 
             case Tag.NUM:
                 /*
@@ -179,15 +159,12 @@ public class Valutatore {
                 return termp(termp_i / fact());
 
             case '+':
-                break;
-
-            case '-':
-                break;
-
-            case ')':
-                break;
 
             case -1:
+
+            case ')':
+
+            case '-':
                 break;
 
             default:
@@ -202,20 +179,18 @@ public class Valutatore {
         // int expr_val, NUM_val;
 
         switch (look.tag) {
-            case '(':
+            case '(' -> {
                 match(Tag.LPT);
                 fact_val = expr();
                 match(Tag.RPT);
                 return fact_val;
-
-            case Tag.NUM:
+            }
+            case Tag.NUM -> {
                 fact_val = ((NumberTok) look).value;
                 match(Tag.NUM);
                 return fact_val;
-
-            default:
-                error("Error in fact");
-
+            }
+            default -> error("Error in fact");
         }
         return 0;
     }

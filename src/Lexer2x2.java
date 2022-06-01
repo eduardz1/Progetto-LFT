@@ -2,7 +2,6 @@ import java.io.*;
 
 public class Lexer2x2 {
 
-    private final String identifier_RE = "[a-zA-Z[_[_]*[a-zA-Z0-9]]][a-zA-Z0-9_]*"; // espressione regolare per gli identificatori
     public static int line = 1;
     private char peek = ' ';
 
@@ -128,13 +127,15 @@ public class Lexer2x2 {
 
         default:
             if (Character.isLetter(peek) || peek == '_') { // gestisco identificatori e parole chiave             
-                String identifier = "";
+                StringBuilder identifier = new StringBuilder();
                 while (Character.isLetterOrDigit(peek) || peek == '_') {
-                    identifier += peek;
+                    identifier.append(peek);
                     readch(br);
                 }
 
-                switch (identifier) {
+                // espressione regolare per gli identificatori
+                String identifier_RE = "[a-zA-Z_*a-zA-Z0-9][a-zA-Z0-9_]*";
+                switch (identifier.toString()) {
 
                     case "assign":
                         return Word.assign;
@@ -170,8 +171,8 @@ public class Lexer2x2 {
                         return Word.and;
 
                     default:
-                        if (identifier.matches(identifier_RE)) {
-                            return new Word(Tag.ID, identifier);
+                        if (identifier.toString().matches(identifier_RE)) {
+                            return new Word(Tag.ID, identifier.toString());
                         }
                         System.err.println("Syntax error in: " + identifier);
                         return null;
@@ -180,14 +181,14 @@ public class Lexer2x2 {
 
             } else if (Character.isDigit(peek)) {
 
-                String number = "";
+                StringBuilder number = new StringBuilder();
                 while (Character.isDigit(peek)) {
-                    number += peek;
+                    number.append(peek);
                     readch(br);
                 }
                 
                 if (number.charAt(0) != '0')
-                    return new NumberTok(Tag.NUM, number);
+                    return new NumberTok(Tag.NUM, number.toString());
                 else
                     return new NumberTok(Tag.NUM, "0");
 

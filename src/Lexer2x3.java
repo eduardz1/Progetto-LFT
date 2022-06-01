@@ -2,8 +2,7 @@ import java.io.*;
 
 public class Lexer2x3 {
 
-    private final String identifier_RE = "[a-zA-Z[_[_]*[a-zA-Z0-9]]][a-zA-Z0-9_]*"; // espressione regolare per gli
-                                                                                    // identificatori
+    // identificatori
     public int line = 1;
     private char peek = ' ';
 
@@ -59,7 +58,9 @@ public class Lexer2x3 {
                 readch(br);
                 switch (peek) {
                     case '/': // in-line comment
-                        for (; peek != '\n' && peek != (char)Tag.EOF; readch(br));
+                        while (peek != '\n' && peek != (char)Tag.EOF) {
+                            readch(br);
+                        }
             
                         return lexical_scan(br);
 
@@ -156,13 +157,15 @@ public class Lexer2x3 {
 
             default:
                 if (Character.isLetter(peek) || peek == '_') { // gestisco identificatori e parole chiave
-                    String identifier = "";
+                    StringBuilder identifier = new StringBuilder();
                     while (Character.isLetterOrDigit(peek) || peek == '_') {
-                        identifier += peek;
+                        identifier.append(peek);
                         readch(br);
                     }
 
-                    switch (identifier) {
+                    // espressione regolare per gli
+                    String identifier_RE = "[a-zA-Z_*a-zA-Z0-9][a-zA-Z0-9_]*";
+                    switch (identifier.toString()) {
 
                         case "assign":
                             return Word.assign;
@@ -198,8 +201,8 @@ public class Lexer2x3 {
                             return Word.and;
 
                         default:
-                            if (identifier.matches(identifier_RE)) {
-                                return new Word(Tag.ID, identifier);
+                            if (identifier.toString().matches(identifier_RE)) {
+                                return new Word(Tag.ID, identifier.toString());
                             }
                             System.err.println("Syntax error in: " + identifier);
                             return null;
@@ -208,14 +211,14 @@ public class Lexer2x3 {
 
                 } else if (Character.isDigit(peek)) {
 
-                    String number = "";
+                    StringBuilder number = new StringBuilder();
                     while (Character.isDigit(peek)) {
-                        number += peek;
+                        number.append(peek);
                         readch(br);
                     }
 
                     if (number.charAt(0) != '0')
-                        return new NumberTok(Tag.NUM, number);
+                        return new NumberTok(Tag.NUM, number.toString());
                     else
                         return new NumberTok(Tag.NUM, "0");
 

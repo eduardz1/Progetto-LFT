@@ -1,7 +1,7 @@
 import java.util.*;
 
 public class SymbolTable { // ------------v hash table implementation of a Map interface
-    Map<String, Integer> OffsetMap = new HashMap<String, Integer>();
+    final Map<String, Integer> OffsetMap = new HashMap<>();
     // ^ object that maps keys to values
 
     public void insert(String s, int address) {
@@ -13,9 +13,7 @@ public class SymbolTable { // ------------v hash table implementation of a Map i
     }
 
     public int lookupAddress(String s) {
-        if (OffsetMap.containsKey(s)) // return true if this map contains a mapping for "s" key
-            return OffsetMap.get(s); // returns value of "s" key
-        else
-            return -1;
+        // return true if this map contains a mapping for "s" key
+        return OffsetMap.getOrDefault(s, -1); // returns value of "s" key
     }
 }

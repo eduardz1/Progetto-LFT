@@ -1,8 +1,8 @@
 import java.io.*;
 
 public class Parser3x1 {
-    private Lexer2x3 lex;
-    private BufferedReader pbr;
+    private final Lexer2x3 lex;
+    private final BufferedReader pbr;
     private Token look;
 
     public Parser3x1(Lexer2x3 l, BufferedReader br) {
@@ -32,37 +32,22 @@ public class Parser3x1 {
     /// GUIDA(start)
     public void start() {
         switch (look.tag) {
-            case '(':
+            case '(', Tag.NUM -> {
                 expr();
                 match(Tag.EOF);
-                break;
-
-            case Tag.NUM:
-                expr();
-                match(Tag.EOF);
-                break;
-
-            default:
-                error("Error in start");
+            }
+            default -> error("Error in start");
         }
     }
 
     /// FIRST(expr) = FIRST(term) = FIRST(fact) = {NUM} U {(} <== GUIDA(expr)
     private void expr() {
         switch (look.tag) {
-            case '(':
+            case '(', Tag.NUM -> {
                 term();
                 exprp();
-                break;
-
-            case Tag.NUM:
-                term();
-                exprp();
-                break;
-
-            default:
-                error("Error in expr");
-
+            }
+            default -> error("Error in expr");
         }
     }
 
@@ -100,19 +85,11 @@ public class Parser3x1 {
     /// FIRST(term) = FIRST(fact) = {NUM} U {(} <== GUIDA(term)
     private void term() {
         switch (look.tag) {
-            case '(':
+            case '(', Tag.NUM -> {
                 fact();
                 termp();
-                break;
-
-            case Tag.NUM:
-                fact();
-                termp();
-                break;
-
-            default:
-                error("Error in term");
-
+            }
+            default -> error("Error in term");
         }
 
     }
@@ -138,12 +115,10 @@ public class Parser3x1 {
                 break;
 
             case '-':
-                break;
-
-            case ')':
-                break;
 
             case -1:
+
+            case ')':
                 break;
 
             // ERROR
@@ -156,19 +131,15 @@ public class Parser3x1 {
     private void fact() {
         switch (look.tag) {
             // GUIDA[<fact> := (<expr>)] = {(}
-            case '(':
+            case '(' -> {
                 match(Tag.LPT);
                 expr();
                 match(Tag.RPT);
-                break;
+            }
 
             // GUIDA[<fact> := NUM] = {NUM}
-            case Tag.NUM:
-                match(Tag.NUM);
-                break;
-
-            default:
-                error("Error in fact");
+            case Tag.NUM -> match(Tag.NUM);
+            default -> error("Error in fact");
         }
     }
 
